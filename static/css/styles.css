@@ -1,0 +1,160 @@
+:root {
+	--white: #F2E9E4;
+	--black: #22223B;
+	--white60: #F2E9E499;
+	--black60: #22223A99;
+
+	--blue: #2892D7;
+	--red: #A31621;
+	--yellow: #E5D352;
+
+	--chrome: 0;
+	--animation: var(--smooth);
+	--smooth: cubic-bezier(0.2, 0.85, 0.6, 1);
+	--instant: step-start;
+
+	--accent1: var(--blue);
+	--accent2: var(--red);
+	--accent3: var(--yellow);
+
+	--primary: var(--black);
+	--text: var(--white);
+	--primary60: var(--black60);
+	--text60: var(--white60);
+
+	--shadow: 0 0 1.5em -0.25em var(--text60);
+	--shadow2: 0 0 1.5em -0.25em var(--primary60);
+	--focus: 0 0 0.25em 0.25em var(--edit);
+	--focus2: 0 0 0.25em 0.25em var(--edit2);
+
+	--pill: 69em;
+	--round10x: 10px;
+	--round15x: 15px;
+
+	--smaller: .5em;
+	--small: .75em;
+	--normal: 24px;
+	--large: 1.5em;
+	--larger: 2em;
+	--largest: 2.5em;
+	--hero: 'Libre Barcode 39', sans-serif;
+	--title: 'Roboto', sans-serif;
+	--body: 'Courier Prime', monospace;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	position: relative;
+
+	color: var(--text);
+	font-family: var(--title);
+	font-size: var(--normal);
+
+	transition: all .25s;
+	transition-timing-function: var(--animate);
+}
+*:focus-visible {
+	outline: none;
+	box-shadow: var(--focus) !important;
+	transition: all 0.25s;
+}
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #cdcdcd #f0f0f0;
+}
+*::-webkit-scrollbar {
+	background-color: #f0f0f0;
+	width: 8px;
+	height: 8px;
+}
+*::-webkit-scrollbar-track {
+	background-color: #f0f0f0;
+}
+*::-webkit-scrollbar-thumb {
+	background-color: #cdcdcd;
+	border: 1px solid #f0f0f0;
+}
+*::-webkit-scrollbar-thumb:hover {
+	background-color: #a6a6a6;
+}
+*::-webkit-scrollbar-thumb:active {
+	background-color: #606060;
+}
+
+.noselect,
+.material-icons {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.disabled {
+	cursor: not-allowed;
+	opacity: .5;
+}
+
+html {
+	width: 100vw;
+	height: 100vh;
+	background-color: var(--primary);
+	overflow-x: hidden;
+	overflow-y: scroll;
+	filter: grayscale(var(--chromatic));
+}
+.pauseScroll {
+	overflow: hidden;
+}
+
+h1 {
+	font-size: var(--larger);
+}
+h2 {
+	font-size: var(--large);
+}
+h3 {
+	font-size: var(--normal);
+}
+a {
+	font-family: var(--body);
+	width: fit-content;
+}
+p {
+	font-family: var(--body);
+	max-width: 45ch;
+}
+span {
+	font: inherit;
+	display: inline-block;
+}
+.tiny-text {
+	color: var(--text60);
+	font-size: var(--smaller);
+	font-weight: bold;
+	text-transform: uppercase;
+}
+.barcode { font-family: var(--hero); }
+.caption {
+	padding-top: 0.25em;
+	font-size: var(--small);
+	font-style: italic;
+	font-weight: bold;
+}
+
+.tag {
+	width: fit-content;
+	height: fit-content;
+
+	padding: 0.5em 1em;
+	border-radius: var(--pill);
+
+	color: var(--primary);
+	font-size: var(--small);
+}
+
+button { 
+	cursor: pointer;
+	border: none;		
+}

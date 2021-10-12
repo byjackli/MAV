@@ -84,8 +84,14 @@ See Projects section for project-specific tools that were used.
 
 
 ### Color Contrast
-* rabbit hole from "Count Primes" Leetcode problem
-* inspired by the wheel animation in Zach Star's video on modular arithmetic
+* need to auto-generate dark or light variants of colors
+* need to offer a limited selection of colors
+* all color combinations must be WCAG2.1 AAA compliant
+
+
+### Media Query Vars
+* CSS Media Queries does not support modifying root and variables
+* this is required to maintain responsive web design
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

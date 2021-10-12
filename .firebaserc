@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "homepage-byjackli"
+  },
+  "targets": {
+    "homepage-byjackli": {
+      "hosting": {
+        "v1": [
+          "experiments"
+        ]
+      }
+    }
+  }
+}
