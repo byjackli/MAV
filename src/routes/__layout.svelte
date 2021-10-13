@@ -1,6 +1,6 @@
 <script>
-	import Tag from '../components/Tag.svelte';
+	import Nav from '../components/Nav.svelte';
 </script>
 
-<Tag />
+<Nav />
 <slot />

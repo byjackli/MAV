@@ -2,11 +2,25 @@
 	import Warn from '../components/Warn.svelte';
 </script>
 
+<svelte:head>
+	<title>Experiments by Jack Li</title>
+	<meta name="description" content="A group of computer-based mini-projects by Jack" />
+	<meta
+		name="keywords"
+		content="computer science, front end, front-end, developer, software, projects, mini-projects, svelte, sveltekit, github, fun, leetcode"
+	/>
+	<meta name="og:title" content="Experiments by Jack Li" />
+	<meta name="og:description" content="A group of computer-based mini-projects by Jack" />
+	<meta name="og:url" content="https://experiments.byjackli.com" />
+	<meta name="og:type" content="website" />
+</svelte:head>
+
 <div class="container">
 	<header>
 		<h1 aria-label="Experiments">
 			<span class="noselect">*</span>Experiments<span class="noselect">*</span>
 		</h1>
+		<br />
 		<span>by Jack Li</span>
 		<p>
 			On this page, you'll find me either testing ideas, exploring leetcode problems, and other
@@ -18,22 +32,49 @@
 			<h2>explore the projects:</h2>
 			<Warn message="All mini-projects are, by default, not maintained. Clone at your own risk!" />
 			<div class="list-container">
-				<a href="https://github.com/byjackli/experiments">GitHub Repo</a>
-				<a href="/modular-arithmetic-visualizer">Modular Arithmetic Visualizer</a>
-				<a class="disabled" on:click|preventDefault={null} href="/svelte-forms">Svelte Forms</a>
-				<a class="disabled" on:click|preventDefault={null} href="/color-contrast">Color Contrast</a>
-				<a class="disabled" on:click|preventDefault={null} href="/media-query-vars"
-					>Media Query Vars</a
+				<a href="https://github.com/byjackli/experiments" title="view code">GitHub Repo</a>
+				<a href="/modular-arithmetic-visualizer" title="Not maintained."
+					>Modular Arithmetic Visualizer</a
+				>
+				<a class="disabled" title="coming soon" on:click|preventDefault={null} href="/svelte-forms"
+					>Svelte Forms</a
+				>
+				<a
+					class="disabled"
+					title="coming soon"
+					on:click|preventDefault={null}
+					href="/color-contrast">Color Contrast</a
+				>
+				<a
+					class="disabled"
+					title="coming soon"
+					on:click|preventDefault={null}
+					href="/media-query-vars">Media Query Vars</a
 				>
 			</div>
 		</section>
 		<section>
 			<h2>connect with jack:</h2>
 			<div class="list-container">
-				<a target="_blank" href="https://twitter.com/byjackli">Twitter</a>
-				<a target="_blank" href="https://www.linkedin.com/in/byjackli/">LinkedIn</a>
-				<a target="_blank" href="https://github.com/byjackli">GitHub</a>
-				<a target="_blank" href="https://open.spotify.com/user/primeno17">Spotify</a>
+				<a
+					target="_blank"
+					title="how I keep up with developer news"
+					href="https://twitter.com/byjackli">Twitter</a
+				>
+				<a target="_blank" title="how I stay motivated" href="https://www.linkedin.com/in/byjackli/"
+					>LinkedIn</a
+				>
+				<a target="_blank" title="how I manage my projects" href="https://github.com/byjackli"
+					>GitHub</a
+				>
+				<a
+					target="_blank"
+					title="how I stay calm while coding"
+					href="https://open.spotify.com/user/primeno17">Spotify</a
+				>
+				<a target="_blank" title="how I unwind after work" href="https://instagram.com/byjackli"
+					>Instagram</a
+				>
 			</div>
 		</section>
 	</main>
@@ -46,7 +87,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 1em;
 		font-size: var(--large);
 	}
 	h1,
@@ -58,14 +98,14 @@
 	h1 {
 		background-color: var(--text);
 		padding: 0.5em;
-		padding-bottom: 0.15em;
+		padding-bottom: 0.4em;
 		border-radius: 5px;
 
 		font-size: var(--largest);
 	}
 	p {
 		padding: 2ch;
-		padding-top: 0.5em;
+		padding-top: 1.5em;
 	}
 	div.container {
 		padding: 5em;
