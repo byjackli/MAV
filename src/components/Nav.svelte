@@ -3,7 +3,7 @@
 		<span class="barcode">
 			<span class="noselect">*</span><span>experiments</span><span class="noselect">*</span>
 		</span>
-		<p>hover for menu</p>
+		<p>more from jack</p>
 	</div>
 	<ul>
 		<li>

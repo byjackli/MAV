@@ -1,10 +1,12 @@
 <script>
 	let canvas,
-		num = 0,
-		mod = 0,
+		dividend = 0,
+		divisor = 0,
 		uiPrimes = 0,
 		uiArray = [],
 		gotMod = [];
+
+	let primes = true;
 
 	const wide = 2000,
 		center = 1000;
@@ -58,22 +60,22 @@
 	}
 
 	function getMod() {
-		if (!num || !mod) return;
+		if (!dividend || !divisor) return;
 		const arr = [];
 
-		for (let i = 0; i < num; i++) {
-			if (!arr[i % mod]) arr.push([]);
-			arr[i % mod].push(i);
+		for (let i = 0; i < dividend; i++) {
+			if (!arr[i % divisor]) arr.push([]);
+			arr[i % divisor].push(i);
 		}
 		return arr;
 	}
 
 	function setup() {
-		if (!num || !mod) return;
+		if (!dividend || !divisor) return;
 
 		const ctx = canvas.getContext('2d'),
-			arcs = num / mod,
-			width = 5 * mod;
+			arcs = dividend / divisor,
+			width = 5 * divisor;
 
 		ctx.clearRect(0, 0, wide, wide);
 
@@ -85,9 +87,9 @@
 		}
 
 		// drawing sections
-		const angle = (2 * Math.PI) / mod;
-		console.info(`angle:${angle}  |  mod:${mod}  |`);
-		for (let k = 1; k < mod + 1; k++) {
+		const angle = (2 * Math.PI) / divisor;
+		console.info(`angle:${angle}  |  divisor:${divisor}  |`);
+		for (let k = 1; k < divisor + 1; k++) {
 			const h = 500 + width * arcs,
 				x = (h * Math.sin(angle * k) * 180) / Math.PI,
 				y = (h * Math.cos(angle * k) * 180) / Math.PI;
@@ -108,52 +110,185 @@
 	}
 </script>
 
-<div>
-	<h1>Modular Arithmetic Visualizer</h1>
-	<p>A rabbit-hole project that snowballed from an "easy" LeetCode question.</p>
-    <p>Primes are highlighted in yellow.</p>
-</div>
-<div>
-	<label for="number">number</label>
-	<input name="number" bind:value={num} placeholder="number" />
-	<label for="modulo">modulo</label>
-	<input name="modulo" bind:value={mod} placeholder="modulo" />
-	<br />
-	<br />
-	<hr />
-	<strong>number of primes: {countPrimes(num, mod)} </strong>
+<svelte:head>
+	<title>Modular Arithmetic Visualizer</title>
+	<meta name="description" content="Visualize modular arithmetic with primes highlighted." />
+	<meta
+		name="keywords"
+		content="modulo, modular, arithmetic, modular arithmetic, primes, count primes, prime numbers, computer science, front end, front-end, developer, software, projects, mini-projects, svelte, sveltekit, github, fun, leetcode"
+	/>
+	<meta name="og:title" content="Modular Arithmetic Visualizer" />
+	<meta name="og:description" content="Visualize modular arithmetic with primes highlighted." />
+	<meta name="og:url" content="https://experiments.byjackli.com/modular-arithmetic-visualizer" />
+	<meta name="og:type" content="website" />
+</svelte:head>
 
-	{#if gotMod}
-		<ul>
-			{#each gotMod as bigMod (bigMod)}
-				<li>
-					{#each bigMod as tinyMod (tinyMod)}
-						{#if uiArray.includes(tinyMod)}
-							<span class="prime">{tinyMod}</span>
-						{:else}
-							<span>{tinyMod}</span>
-						{/if}
-					{/each}
-				</li>
-			{/each}
-		</ul>
-	{/if}
+<div class="container">
+	<div id="header">
+		<h1>Modular Arithmetic Visualizer</h1>
+		<p>A rabbit-hole project that snowballed from an "easy" Counting Primes LeetCode question.</p>
+		<ol>
+			<li>Primes are highlighted.</li>
+			<li>All calculations are done on your device.</li>
+			<li>
+				View the <a href="https://leetcode.com/problems/count-primes/" target="_blank"
+					>LeetCode question</a
+				>
+			</li>
+			<li>
+				Learn more about the
+				<a href="https://en.wikipedia.org/wiki/Modulo_operation" target="_blank">
+					Modulo operation
+				</a>
+			</li>
+		</ol>
+	</div>
+	<main>
+		<div id="inputs">
+			<div>
+				<label for="dividend">dividend</label>
+				<input name="dividend" bind:value={dividend} placeholder="dividend" />
+			</div>
+			<div>mod</div>
+			<div>
+				<label for="divisor">divisor</label>
+				<input name="divisor" bind:value={divisor} placeholder="divisor" />
+			</div>
+		</div>
+		<hr />
+		<strong>number of primes: {countPrimes(dividend, divisor)} </strong>
+		{#if uiArray}
+			<ul id="list-primes">
+				{#each uiArray as prime (prime)}
+					<li>{prime}</li>
+				{/each}
+			</ul>
+		{/if}
 
-	{#if uiArray}
-		<ul>
-			{#each uiArray as prime (prime)}
-				<li>{prime}</li>
-			{/each}
-		</ul>
-	{/if}
-	<canvas width={`${wide}px`} height={`${wide}px`} bind:this={canvas} />
+		{#if gotMod}
+			<ul id="list-mod">
+				{#each gotMod as bigMod (bigMod)}
+					<li>
+						{#each bigMod as tinyMod (tinyMod)}
+							{#if uiArray.includes(tinyMod)}
+								<span class="prime">{tinyMod}</span>
+							{:else}
+								<span>{tinyMod}</span>
+							{/if}
+						{/each}
+					</li>
+				{/each}
+			</ul>
+		{/if}
+		{#if false}
+			<canvas width={`${wide}px`} height={`${wide}px`} bind:this={canvas} />
+		{/if}
+	</main>
 </div>
 
 <style>
-	.prime {
-		background-color: orange;
+	div.container,
+	#header {
+		display: flex;
+		flex-direction: column;
 	}
+	div.container {
+		width: 100vw;
+		min-height: 100vh;
+
+		align-items: center;
+
+		background-color: darkslateblue;
+		border: 0.5em solid midnightblue;
+		border-right-width: 0.9em;
+	}
+	div.container * {
+		color: white;
+		font-family: var(--body);
+	}
+
+	#header {
+		padding: 1em;
+		margin-bottom: 2em;
+		gap: 1em;
+		/* align-items: center; */
+
+		width: 100%;
+		background-color: midnightblue;
+	}
+	#header p,
+	#header ol {
+		margin-left: 1em;
+	}
+	div.container h1 {
+		font-family: var(--title);
+	}
+
+	main {
+		width: 80vw;
+		padding-bottom: 2em;
+	}
+	div#inputs {
+		display: flex;
+		flex-direction: row;
+		gap: 1em;
+	}
+	div#inputs > div {
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+	}
+
+	div.container input {
+		color: darkslateblue;
+	}
+
+	hr {
+		margin: 3em 0 1em 0;
+	}
+
+	.prime,
+	#list-primes li {
+		background-color: midnightblue;
+	}
+	ul,
+	#list-primes li,
+	#list-mod li,
 	span {
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+	}
+	ul {
+		width: 100%;
+		padding: 0;
+		margin-bottom: 2em;
+
+		overflow-x: auto;
+		gap: 1em;
+	}
+
+	ul#list-primes {
+		flex-direction: row;
+		gap: 0em;
+	}
+	#list-mod li {
+		min-width: 100%;
+		width: fit-content;
+		flex-direction: row;
+		background-color: rgba(255, 255, 255, 0.15);
+	}
+	#list-mod span,
+	#list-primes li {
+		width: 2.5em;
+		height: 2.5em;
+		border: solid midnightblue 2px;
+
+		padding: 0.25em;
 		margin: 10px;
+
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
 	}
 </style>
