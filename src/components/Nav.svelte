@@ -17,9 +17,7 @@
 		</li>
 
 		<li>
-			<a class="disabled" title="coming soon" on:click|preventDefault={null} href="/svelte-forms"
-				>Svelte Forms</a
-			>
+			<a title="coming soon" href="/svelte-forms">Svelte Forms</a>
 		</li>
 		<li>
 			<a class="disabled" title="coming soon" on:click|preventDefault={null} href="/color-contrast"
@@ -53,7 +51,7 @@
 
 	div {
 		height: 9vh;
-		gap: .25em;
+		gap: 0.25em;
 	}
 
 	nav {
@@ -66,6 +64,7 @@
 
 		padding: 0.3em 0.1em;
 		background-color: var(--text);
+		box-shadow: var(--shadow2);
 		z-index: 99999;
 	}
 	nav:hover,
@@ -87,7 +86,7 @@
 	ul {
 		width: 100%;
 		height: 21vh;
-		padding: .5em 0;
+		padding: 0.5em 0;
 
 		gap: 0.5em;
 

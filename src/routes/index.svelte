@@ -36,9 +36,7 @@
 				<a href="/modular-arithmetic-visualizer" title="Not maintained."
 					>Modular Arithmetic Visualizer</a
 				>
-				<a class="disabled" title="coming soon" on:click|preventDefault={null} href="/svelte-forms"
-					>Svelte Forms</a
-				>
+				<a title="Work in progress." href="/svelte-forms">Svelte Forms</a>
 				<a
 					class="disabled"
 					title="coming soon"

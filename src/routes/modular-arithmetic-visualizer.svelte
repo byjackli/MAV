@@ -111,13 +111,13 @@
 </script>
 
 <svelte:head>
-	<title>Modular Arithmetic Visualizer</title>
+	<title>Modular Arithmetic Visualizer - Experiments by Jack Li</title>
 	<meta name="description" content="Visualize modular arithmetic with primes highlighted." />
 	<meta
 		name="keywords"
 		content="modulo, modular, arithmetic, modular arithmetic, primes, count primes, prime numbers, computer science, front end, front-end, developer, software, projects, mini-projects, svelte, sveltekit, github, fun, leetcode"
 	/>
-	<meta name="og:title" content="Modular Arithmetic Visualizer" />
+	<meta name="og:title" content="Modular Arithmetic Visualizer - Experiments by Jack Li" />
 	<meta name="og:description" content="Visualize modular arithmetic with primes highlighted." />
 	<meta name="og:url" content="https://experiments.byjackli.com/modular-arithmetic-visualizer" />
 	<meta name="og:type" content="website" />
