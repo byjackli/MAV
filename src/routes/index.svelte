@@ -37,17 +37,12 @@
 					>Modular Arithmetic Visualizer</a
 				>
 				<a title="Work in progress." href="/svelte-forms">Svelte Forms</a>
+				<a title="Work in progress." href="/color-builder">Color Builder</a>
 				<a
 					class="disabled"
 					title="coming soon"
 					on:click|preventDefault={null}
-					href="/color-contrast">Color Contrast</a
-				>
-				<a
-					class="disabled"
-					title="coming soon"
-					on:click|preventDefault={null}
-					href="/media-query-vars">Media Query Vars</a
+					href="/bulk-image-compression">Bulk Image Compression</a
 				>
 			</div>
 		</section>

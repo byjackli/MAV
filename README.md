@@ -37,7 +37,7 @@
     <ul>
         <li><a href="#modular-arithmetic-visualizer">Modular Arithmetic Visualizer</a></li>
         <li><a href="#svelte-forms">Svelte Forms</a></li>
-        <li><a href="#color-contrast">Color Contrast</a></li>
+        <li><a href="#color-contrast">Color Builder</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -83,15 +83,15 @@ See Projects section for project-specific tools that were used.
 * taking some inspiration from Formik and svelte-forms
 
 
-### Color Contrast
+### Color Builder
 * need to auto-generate dark or light variants of colors
 * need to offer a limited selection of colors
 * all color combinations must be WCAG2.1 AAA compliant
 
 
-### Media Query Vars
-* CSS Media Queries does not support modifying root and variables
-* this is required to maintain responsive web design
+### Bulk Image Compression
+* simple fast way to easily compress lots of images at a time, one-click approach
+* inspired by squoosh
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -103,7 +103,8 @@ Currently working on projects that are marked.
 
 - [ ] Modular Arithmetic Visualizer
 - [x] Svelte Forms
-- [x] Color Contrast
+- [x] Color Builder
+- [x] Bulk Image Compression
 
 @ me on [twitter](https://www.twitter.com/byjackli) if something stands out.
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -135,7 +136,10 @@ Project Link: [https://github.com/byjackli/experiments](https://github.com/byjac
 * [Formik](https://formik.org/) Forms library for React
 * [Svelte Forms](https://github.com/chainlist/svelte-forms) Forms library for Svelte
 
-<strong>Color Contrast</strong>
+<strong>Color Builder</strong>
 * [WebAIM](https://webaim.org/) Contrast Checker
+
+<strong>Bulk Image Compression</strong>
+* [Squoosh](https://squoosh.app/) Image optimizer
 
 <p align="right">(<a href="#top">back to top</a>)</p>

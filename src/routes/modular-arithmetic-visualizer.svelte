@@ -193,8 +193,6 @@
 		flex-direction: column;
 	}
 	div.container {
-		width: 100vw;
-		min-height: 100vh;
 
 		align-items: center;
 
@@ -232,6 +230,7 @@
 		display: flex;
 		flex-direction: row;
 		gap: 1em;
+		flex-wrap: wrap;
 	}
 	div#inputs > div {
 		display: flex;

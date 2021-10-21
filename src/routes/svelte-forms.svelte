@@ -110,9 +110,7 @@
 		color: black;
 	}
 	div.container {
-		width: 100%;
-        min-height: 100vh;
-        background-color: white;
+		background-color: white;
 
 		display: flex;
 		flex-direction: column;
@@ -122,9 +120,9 @@
 	}
 	h1 {
 		padding-top: 2em;
-        font-size: 2em;
+		font-size: 2em;
 	}
-    button {
-        margin: 1em 0 2em 0;
-    }
+	button {
+		margin: 1em 0 2em 0;
+	}
 </style>

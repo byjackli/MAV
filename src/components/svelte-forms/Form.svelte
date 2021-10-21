@@ -311,13 +311,13 @@
 
 		font-family: Verdana, Geneva, Tahoma, sans-serif;
 		font-size: 16px;
-        color: black;
+		color: black;
 	}
 	.form-container {
 		width: 60%;
 	}
 	.form-container h2 {
-        font-size: 1.5em;
+		font-size: 1.5em;
 		margin: 0;
 	}
 
@@ -387,5 +387,20 @@
 		white-space: -pre-wrap; /* Opera 4-6 */
 		white-space: -o-pre-wrap; /* Opera 7 */
 		word-wrap: break-word; /* Internet Explorer 5.5+ */
+	}
+
+	@media only screen and (max-width: 400px) {
+		div.form-container {
+			width: 95% !important;
+			border-radius: 0.5em !important;
+			padding: 1em !important;
+		}
+	}
+
+	@media only screen and (min-width: 400px) and (max-width: 600px) {
+		div.form-container {
+			width: 85% !important;
+			border-radius: 0.5em !important;
+		}
 	}
 </style>

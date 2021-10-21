@@ -52,7 +52,7 @@
 	font-size: var(--normal);
 
 	transition: all .25s;
-	transition-timing-function: var(--animate);
+	transition-timing-function: var(--animation);
 }
 *:focus-visible {
 	outline: none;
@@ -156,4 +156,9 @@ span {
 
 button { 
 	cursor: pointer;	
+}
+
+div.container {
+	width: 100vw;
+	min-height: 100vh;
 }

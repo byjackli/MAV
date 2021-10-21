@@ -17,19 +17,17 @@
 		</li>
 
 		<li>
-			<a title="coming soon" href="/svelte-forms">Svelte Forms</a>
+			<a href="/svelte-forms" title="Svelte Forms">Svelte Forms</a>
 		</li>
 		<li>
-			<a class="disabled" title="coming soon" on:click|preventDefault={null} href="/color-contrast"
-				>Color Contrast</a
-			>
+			<a href="/color-builder" title="Color Builder">Color Builder</a>
 		</li>
 		<li>
 			<a
 				class="disabled"
 				title="coming soon"
 				on:click|preventDefault={null}
-				href="/media-query-vars">Media Query Vars</a
+				href="/bulk-image-compression">BIC</a
 			>
 		</li>
 	</ul>

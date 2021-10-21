@@ -1,66 +1,51 @@
-/* Smartphones (portrait and landscape) ----------- */
-@media only screen 
-and (min-device-width : 320px) 
-and (max-device-width : 480px) {
-/* Styles */
-	:root {
-		--normal: 18px;
+@media only screen and (max-width : 400px) {
+	html {
+		--normal: 18px !important;
+	}
+	div.container {
+		padding: 0 !important;
+	}
+	header {
+		font-size: 14px !important;
+	}
+	main {
+		padding: 1.5em !important;
+	}
+	div.list-container {
+		width: 100% !important;
 	}
 }
 
-/* Smartphones (landscape) ----------- */
 @media only screen 
-and (min-width : 321px) {
-/* Styles */
-}
-
-/* Smartphones (portrait) ----------- */
-@media only screen 
-and (max-width : 320px) {
-/* Styles */
-}
-
-/* iPads (portrait and landscape) ----------- */
-@media only screen 
-and (min-device-width : 768px) 
-and (max-device-width : 1024px) {
-/* Styles */
-	:root {
-		--normal: 18px;
+and (min-width : 400px)
+and (max-width : 600px) {
+	div.container {
+		padding: 0 !important;
+	}
+	header {
+		font-size: 18px !important;
+	}
+	main {
+		padding: 1.5em !important;
+	}
+	div.list-container {
+		width: 100% !important;
 	}
 }
 
-/* iPads (landscape) ----------- */
 @media only screen 
-and (min-device-width : 768px) 
-and (max-device-width : 1024px) 
-and (orientation : landscape) {
-/* Styles */
-}
-
-/* iPads (portrait) ----------- */
-@media only screen 
-and (min-device-width : 768px) 
-and (max-device-width : 1024px) 
-and (orientation : portrait) {
-/* Styles */
-}
-
-/* Desktops and laptops ----------- */
-@media only screen 
-and (min-width : 1224px) {
-/* Styles */
-}
-
-/* Large screens ----------- */
-@media only screen 
-and (min-width : 1824px) {
-/* Styles */
-}
-
-/* iPhone 4 ----------- */
-@media
-only screen and (-webkit-min-device-pixel-ratio : 1.5),
-only screen and (min-device-pixel-ratio : 1.5) {
-/* Styles */
+and (min-width : 600px)
+and (max-width : 900px) {
+	div.container {
+		padding: 2em !important;
+	}
+	header {
+		font-size: 26px !important;
+	}
+	main {
+		padding: 1.5em !important;
+	}
+	div.list-container {
+		width: 75% !important;
+	}
 }
