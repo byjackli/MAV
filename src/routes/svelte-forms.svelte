@@ -55,30 +55,52 @@
 	{#if toggleForm}
 		<Form
 			title="Sample form"
+			id="this-is-optional"
 			debug
 			saveToLocal
 			fields={[
 				[
 					{
 						uid: 'asddds',
-						name: 'okay great',
+						name: 'Your email -.-',
 						type: 'email',
 						defaultValue: 'hmm',
-						tooltip: 'haha good luck'
+						tooltip: 'haha good luck',
+						validity: function (value) {
+							return {
+								'first one': {
+									check: true,
+									string: 'good job'
+								},
+								'second one': {
+									check: 0 < value.length,
+									string: 'email is not empty'
+								}
+							};
+						}
 					},
 					{
 						uid: 'dadffa',
 						name: 'First Name',
 						type: 'text',
 						defaultValue: 'hmm',
-						required: true
+						required: true,
+						redact: true
 					},
 					{
 						uid: 'idk',
 						name: 'Last Name',
 						type: 'text',
 						defaultValue: 'hmm',
-						required: true
+						required: true,
+						redact: true
+					},
+					{
+						uid: 'filetype24',
+						name: 'upload 1 file',
+						type: 'file',
+						defaultValue: '',
+						preview: true
 					},
 					{
 						uid: 'filetype234',
@@ -86,14 +108,16 @@
 						type: 'file',
 						defaultValue: '',
 						preview: true,
-						multiple: true
+						multiple: true,
+						dontSave: true
 					},
 					{
 						uid: 'id234k',
 						name: 'some text block stuff',
 						type: 'textarea',
 						defaultValue: 'hmm',
-						required: true
+						required: true,
+						redact: true
 					}
 				]
 			]}
@@ -110,6 +134,8 @@
 		color: black;
 	}
 	div.container {
+		width: 100%;
+		min-height: 100vh;
 		background-color: white;
 
 		display: flex;

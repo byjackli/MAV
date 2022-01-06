@@ -1,9 +1,11 @@
 <script>
 	import { onMount } from 'svelte';
+	import Extensions from './extensions.json';
 	// NOTES: implement saveToCloud at critical points
 	//  ie setInterval, onVisibilityChange, onbeforeunload, changePage, manual saves
 
 	export let title,
+		id = null,
 		fullscreen = false,
 		saveToLocal = false, // managed by Form (automatic)
 		saveToCloud = false, // managed by developer (manual)
@@ -19,11 +21,25 @@
 		data = {},
 		required = {},
 		validity = {},
-		touched = {};
+		verdict = {},
+		preview = {},
+		redact = {},
+		touched = {},
+		active = {},
+		dontSave = {};
+
+	// CUSTOMIZATION FEATURES (CSS NAMES)
+	const warn = 'warn',
+		blockHeader = 'form:block/',
+		inputHeader = 'form:input/',
+		inputValidate = 'form:input-validate/',
+		inputPreview = 'form:input-preview/';
 
 	function updateSave() {
 		const saveData = { page, data };
+
 		if (saveToLocal) {
+			for (const field of Object.keys(dontSave)) data[field] = undefined;
 			localStorage.setItem(`form[localSave]: ${title}`, JSON.stringify(saveData));
 		}
 	}
@@ -102,61 +118,116 @@
 	}
 
 	async function updateFeedback(uid) {
-		const conditions = fields[uid]?.validity(data[uid]),
-			block = document.getElementById(`form:block/${uid}`);
+		const conditions = validity[uid](data[uid]),
+			ivBlock = document.getElementById(`${inputValidate}${uid}`);
 
-		let verdict = true,
+		let localVerdict = true,
 			strings = ``;
 
-		for (const settings of Object.values(conditions)) {
-			const check = await settings.check;
+		for (const condition of Object.values(conditions)) {
+			const check = await condition.check;
 
-			verdict = verdict && check;
-			strings += `<p class='pc-${check}'>${settings.string}</p>`;
+			localVerdict = localVerdict && check;
+			strings += `<p class='condition-${check}'>${condition.string}</p>`;
 		}
 		// required, touched, empty ==>
 
-		validity[uid] = verdict;
+		ivBlock.innerHTML = strings;
+		verdict[uid] = localVerdict;
+	}
+	function updatePreview(uid) {
+		const files = data[uid],
+			ipBlock = document.getElementById(`${inputPreview}${uid}`);
+
+		let strings = ``;
+		for (const { base64, meta } of files) {
+			console.info('%c BLOB OF FILE', 'background-color: red; color: white;', getBlob(base64));
+			let ext = meta.name.split('.');
+			ext = Extensions[ext[ext.length - 1]];
+
+			if (ext === undefined) ext = 'insert_drive_file';
+			strings += `<div class="preview" title="${meta.name}"><span class="material-icons">${ext}</span><p>${meta.name}</p></div>`;
+		}
+		console.info('%c Preview ', 'background-color: indigo; color: skyblue; ', files);
+
+		ipBlock.innerHTML = strings;
 	}
 	function updateWarn(uid) {
-		const block = document.getElementById(`form:block/${uid}`);
-		if (required[uid] && checkEmpty(uid)) block.classList.add('warn');
-		else block.classList.remove('warn');
+		const block = document.getElementById(`${blockHeader}${uid}`);
+		if (required[uid] && checkEmpty(uid)) block.classList.add(warn);
+		else block.classList.remove(warn);
 	}
-	function updateTouched(uid) {
+	function onFocus(uid) {
 		touched[uid] = true;
+		active[uid] = true;
 		updateWarn(uid);
 	}
-	function updateField(event, uid) {
+	function onBlur(uid) {
+		active[uid] = false;
+	}
+	async function updateField(event, uid) {
 		if (event.type === 'drop' || event.target.files) {
 			console.info(`Hello! Looks like you're uploading a file!`, event.target.files);
+
 			data[uid] =
-				event.type === 'drop' ? event.dataTransfer.files[0] : getNames(event.target.files);
+				event.type === 'drop' ? event.dataTransfer.files[0] : await getData(event.target.files);
 		} else {
 			data[uid] = event.target.value;
 		}
 
 		if (required[uid]) updateWarn(uid);
 		if (validity[uid]) updateFeedback(uid);
+		if (preview[uid]) updatePreview(uid);
 		updateSave();
 	}
-	function getNames(input) {
+	async function getData(input) {
 		let arr = [];
-		for (const el of Object.values(input)) {
-			console.info(el);
-			arr.push(el.name);
+		for (const file of Object.values(input)) {
+			console.info(file);
+			const meta = {
+					name: file.name,
+					lastModified: file.lastModified,
+					lastModifiedDate: file.lastModifiedDate
+				},
+				base64 = await getBase64(file);
+			console.info('%c file: ', 'background-color: brown; color: orange; ', base64);
+			arr.push({ base64, meta });
 		}
 
 		return arr;
+	}
+
+	async function getBase64(file) {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+
+			reader.onload = () => resolve(reader.result);
+			reader.onerror = (error) => reject(error);
+		});
+	}
+	async function getBlob(base64) {
+		const res = await fetch(base64),
+			blob = await res.blob();
+		return blob;
 	}
 
 	function loadFields() {
 		section = fields.flat();
 		section.forEach((field) => {
 			data[field.uid];
+			active[field.uid] = false;
 			if (field.required) required[field.uid] = field.required;
-			if (field.validity) validity[field.uid] = false;
+			if (field.validity) {
+				validity[field.uid] = field.validity;
+				verdict[field.uid] = false;
+			}
+			if (field.preview) preview[field.uid] = true;
+			if (field.redact) redact[field.uid] = true;
 			if (field.defaultValue) data[field.uid] = field.defaultValue;
+
+			if (field.preview && data[field.uid]) updatePreview(field.uid);
+			if (field.dontSave) dontSave[field.uid] = true;
 		});
 	}
 
@@ -175,34 +246,54 @@
 
 <!-- <svelte:window on:keydown={changePageShortcut} /> -->
 
-<div class="form-container">
+<div class="form-container" {id}>
 	{#if section && !loading}
 		{#if !fullscreen}<h2>{title}</h2>{/if}
 		<form on:submit={(event) => event.preventDefault()}>
 			{#each section as field (field.uid)}
-				<div class="form-block" id={`form:block/${field.uid}`}>
+				<div class="form-block" id={`${blockHeader}${field.uid}`}>
 					{#if !field.hidden}
 						{#if field.type && field.type === 'custom'}
 							<div>{fields.body}</div>
 						{:else}
-							<label for={`form:input/${field.uid}`} title={field.tooltip}>
+							<label for={`${inputHeader}${field.uid}`}>
 								{field.name}
 								{#if field.required}<em>*required</em>{/if}
 							</label>
 							{#if field.type === 'textarea'}
 								<textarea
-									id={`form:input/${field.uid}`}
+									id={`${inputHeader}${field.uid}`}
 									name={field.name}
 									placeholder={field.placeholder}
 									disabled={field.disabled}
 									aria-disabled={field.disabled}
-									value={data[field.uid]}
-									on:focus={() => updateTouched(field.uid)}
-									on:input={(event) => updateField(event, field.uid)}
+									value={redact[field.uid] && !active[field.uid] ? '[redacted]' : data[field.uid]}
+									on:focus={() => onFocus(field.uid)}
+									on:blur={() => onBlur(field.uid)}
+									on:input={async (event) => await updateField(event, field.uid)}
 								/>
 							{:else if field.type === 'file' && field.custom}
-								{#if field.preview && data[field.uid]}
-									<div>preview enabled</div>
+								<!-- 
+								an alternative to creating an entirely separate button with drag drop handles
+
+								 ===== STYLE 1 (not sure how to handle preview)
+								1. create invisible input
+								2. custom styling underneath
+								3. wrap both in a div (for easy custom styling)
+
+								x. documentation on how to custom style
+
+
+								 ===== STYLE 2 (not sure how to handle preview)
+								1. button, drop off area from scratch
+								2. associated button handlers
+								3. associated drop off area handlers
+								4. 
+								
+							
+							-->
+								{#if field.preview}
+									<div id={`${inputPreview}${field.uid}`}>preview enabled</div>
 								{/if}
 								<!-- 
                                 handle case for images and documents
@@ -237,7 +328,10 @@
 									title={`click to choose ${field.multiple ? `files` : `a file`} or drag and drop ${
 										field.multiple ? `files` : `a file`
 									} onto the button`}
-									on:click={(event) => event.preventDefault()}
+									on:click={(event) => {
+										event.preventDefault();
+										document.getElementById(`${inputHeader}${field.uid}`).click();
+									}}
 									on:drop={null}
 									on:dragenter={null}
 									on:dragover={null}
@@ -248,7 +342,7 @@
 										: `click to choose ${field.multiple ? `files` : `a file`}`}
 								</button>
 								<input
-									id={`form:input/${field.uid}`}
+									id={`${inputHeader}${field.uid}`}
 									name={field.name}
 									type={field.type}
 									accept={field.accept}
@@ -257,12 +351,13 @@
 									aria-disabled={field.disabled}
 									aria-hidden
 									style={`display: none`}
-									on:focus={() => updateTouched(field.uid)}
-									on:input={(event) => updateField(event, field.uid)}
+									on:focus={() => onFocus(field.uid)}
+									on:blur={() => onBlur(field.uid)}
+									on:input={async (event) => await updateField(event, field.uid)}
 								/>
 							{:else}
 								<input
-									id={`form:input/${field.uid}`}
+									id={`${inputHeader}${field.uid}`}
 									name={field.name}
 									type={field.type}
 									accept={field.accept}
@@ -270,12 +365,26 @@
 									disabled={field.disabled}
 									aria-disabled={field.disabled}
 									multiple={field.multiple ? true : null}
-									value={field.type === 'file' ? null : data[field.uid]}
-									on:focus={() => updateTouched(field.uid)}
-									on:input={(event) => updateField(event, field.uid)}
+									value={field.type === 'file'
+										? null
+										: redact[field.uid] && !active[field.uid]
+										? '[redacted]'
+										: data[field.uid]}
+									on:focus={() => onFocus(field.uid)}
+									on:blur={() => onBlur(field.uid)}
+									on:input={async (event) => await updateField(event, field.uid)}
 								/>
 							{/if}
 						{/if}
+					{/if}
+					{#if field.tooltip}
+						<div class="container-tooltip">{field.tooltip}</div>
+					{/if}
+					{#if field.validity}
+						<div class="container-validity" id={`${inputValidate}${field.uid}`} />
+					{/if}
+					{#if field.preview}
+						<div class="container-preview" id={`${inputPreview}${field.uid}`} />
 					{/if}
 				</div>
 			{/each}
@@ -286,7 +395,11 @@
 				<div>
 					<div>
 						<code>
-							{JSON.stringify({ data, required, validity, touched, fields }, null, 4)}
+							{JSON.stringify(
+								{ data, required, validity, verdict, active, redact, touched, fields },
+								null,
+								4
+							)}
 						</code>
 					</div>
 				</div>
