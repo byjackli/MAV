@@ -162,3 +162,49 @@ div.container {
 	width: 100vw;
 	min-height: 100vh;
 }
+
+
+
+.warn label, .warn label * {
+	color: red !important;
+}
+.warn input {
+	border-color: red !important;
+}
+
+.condition-true {
+	color: green;
+}
+.condition-false {
+	color: red;
+}
+
+.container-preview {
+	display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1em;
+}
+.preview {
+	gap: 0.25em;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 5em;
+    background-color: darkblue;
+    border-radius: 10px;}
+.preview * {
+	color: orange;
+}
+.preview span {
+	font-size: 2em;
+}
+.preview p {
+	font-size: .5em;
+    white-space: nowrap;
+    width: 5em;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    display: inline-block;
+}
