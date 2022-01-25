@@ -1,55 +1,59 @@
 <script>
 	import { onMount } from 'svelte';
 	import Extensions from './extensions.json';
+	import Field from './Field.svelte';
+	import FormStore, {
+		setEntry,
+		getEntry,
+		existsEntry,
+		updateSave,
+		clearSave,
+		loadSave,
+		belongs
+	} from './FormStore';
 	// NOTES: implement saveToCloud at critical points
 	//  ie setInterval, onVisibilityChange, onbeforeunload, changePage, manual saves
 
 	export let title,
 		id = null,
+		autocomplete = true,
 		fullscreen = false,
 		saveToLocal = false, // managed by Form (automatic)
 		saveToCloud = false, // managed by developer (manual)
 		fields,
-		debug = false;
+		debug = false,
+		onSubmit;
 
 	let loading = true,
 		submitting = false,
+		debugData = null,
 		section = null,
 		autoNav = [];
 
-	let page = 0,
-		data = {},
-		required = {},
-		validity = {},
-		verdict = {},
-		preview = {},
-		redact = {},
-		touched = {},
-		active = {},
-		dontSave = {};
+	// let page = 0,
+	// 	data = {},
+	// 	required = {},
+	// 	validity = {},
+	// 	verdict = {},
+	// 	preview = {},
+	// 	value = {},
+	// 	redact = {},
+	// 	touched = {},
+	// 	active = {},
+	// 	dontSave = {};
+
+	export function spit() {
+		return $FormStore;
+	}
 
 	// CUSTOMIZATION FEATURES (CSS NAMES)
 	const warn = 'warn',
 		blockHeader = 'form:block/',
 		inputHeader = 'form:input/',
-		inputValidate = 'form:input-validate/',
-		inputPreview = 'form:input-preview/';
-
-	function updateSave() {
-		const saveData = { page, data };
-
-		if (saveToLocal) {
-			for (const field of Object.keys(dontSave)) data[field] = undefined;
-			localStorage.setItem(`form[localSave]: ${title}`, JSON.stringify(saveData));
-		}
-	}
-	async function getSave() {
-		if (saveToLocal) {
-			const saveData = localStorage.getItem(`form[localSave]: ${title}`);
-			if (saveData) ({ page, data } = JSON.parse(saveData));
-		}
-		// if (saveToCloud) ({ page, data } = await saveToCloud.getSave());
-	}
+		inputFeedback = 'form:input-feedback/',
+		inputPreview = 'form:input-preview/',
+		groupHeader = 'form:group/',
+		groupFeedback = 'form:group-feedback/';
 
 	// function changePage(value) {
 	//     const navShow = this.state.navShow,
@@ -95,49 +99,128 @@
 	//     }
 	// }
 
-	function checkEmpty(uid) {
-		const field = data[uid];
-		return !(field !== '' && field !== undefined && field !== null);
+	async function submit() {
+		const greenlight = (await checkValidity()).verdict;
+
+		setEntry('submit', true, 'submitting');
+		setEntry('submit', true, 'attempted');
+
+		if (!greenlight) {
+			//  updateFeedback
+			for (const [key, value] of Object.entries($FormStore.verdict)) {
+				if (belongs(value, 'group')) {
+					for (const nested of Object.entries(value))
+						if (!nested[1].verdict) updateFeedback(nested[0], key, nested[1]);
+				} else if (!value.verdict)
+					updateFeedback(key, undefined, await checkValidity('field', key, undefined));
+			}
+
+			//  updateWarn
+			for (const [key, value] of Object.entries($FormStore.required)) {
+				if (typeof value !== 'boolean') {
+					for (const nested of Object.entries(value))
+						updateWarn(nested[0], key, !(nested[1] && checkEmpty(nested[0], key)));
+				} else updateWarn(key, undefined, !(value && checkEmpty(key, undefined)));
+			}
+
+			setEntry('submit', false, 'accepted');
+		} else if (onSubmit) {
+			const success = await onSubmit($FormStore);
+			setEntry('submit', success, 'accepted');
+		} else setEntry('submit', true, 'accepted');
+
+		setEntry('submit', false, 'submitting');
+		updateDebug();
 	}
 
-	function checkValidity(group) {
-		let localVerdict = undefined;
-		if (!group)
-			return Object.values(validity).reduce(
-				(localVerdict, currentVerdict) => localVerdict && currentVerdict
-			);
+	function checkEmpty(fieldid, groupid) {
+		const field = fieldData({ action: 'get' }, fieldid, groupid);
+		return field === '' || field === undefined || field === null;
+	}
 
-		for (const uid of group) {
-			localVerdict =
-				localVerdict ??
-				required[uid] ??
-				validity[uid] ??
-				(data[uid] !== undefined && data[uid] !== '');
+	export async function checkValidity(type, fieldid, groupid) {
+		if (type === 'form' || fieldid === undefined) {
+			for (const block of Object.values(getEntry('verdict'))) {
+				const verdict = block.group ? block.group.verdict : block.verdict;
+				if (!verdict) return { verdict };
+			}
+			return { verdict: true };
 		}
-		return localVerdict;
-	}
 
-	async function updateFeedback(uid) {
-		const conditions = validity[uid](data[uid]),
-			ivBlock = document.getElementById(`${inputValidate}${uid}`);
+		const isEmpty = checkEmpty(fieldid, groupid),
+			isRequired = getEntry('required', fieldid, groupid);
 
-		let localVerdict = true,
-			strings = ``;
+		let verdict = isRequired ? !(isRequired && isEmpty) : true,
+			raw = [],
+			group = undefined;
 
-		for (const condition of Object.values(conditions)) {
-			const check = await condition.check;
+		if (type === 'field') {
+			const func = getEntry('validity', fieldid, groupid);
+			if (func) {
+				const conditions = func(fieldData({ action: 'get' }, fieldid, groupid));
+				for (const condition of Object.values(conditions)) {
+					const expression = await condition.check,
+						feedback = condition[expression] === undefined ? condition.true : condition[expression];
 
-			localVerdict = localVerdict && check;
-			strings += `<p class='condition-${check}'>${condition.string}</p>`;
+					verdict = verdict && expression;
+					raw.push({ verdict: expression, feedback });
+				}
+			}
 		}
-		// required, touched, empty ==>
+		setEntry('verdict', { verdict, raw }, fieldid, groupid);
 
-		ivBlock.innerHTML = strings;
-		verdict[uid] = localVerdict;
+		if ((groupid && getEntry('group', groupid).required) || type === 'group') {
+			group = { verdict: true, raw: [] };
+
+			for (const [key, value] of Object.entries(getEntry('verdict', groupid))) {
+				if (key === 'group') continue;
+				group.verdict = group.verdict && value.verdict;
+				group.raw.push(...value.raw);
+			}
+			setEntry('verdict', group, 'group', groupid);
+		}
+
+		return { verdict, raw };
 	}
-	function updatePreview(uid) {
-		const files = data[uid],
-			ipBlock = document.getElementById(`${inputPreview}${uid}`);
+	async function updateFeedback(fieldid, groupid, validation) {
+		const groupOnly = groupid && getEntry('group', groupid).feedback;
+		let { verdict, raw } = validation,
+			block = document.getElementById(`${inputFeedback}${utos(groupid)}${fieldid}`);
+
+		if (groupOnly) {
+			block = document.getElementById(`${groupFeedback}${groupid}`);
+			raw = getEntry('verdict', groupid).group.raw;
+		}
+
+		function build(feedback, expression) {
+			const p = document.createElement('p'),
+				t = document.createTextNode(feedback);
+
+			p.classList.add(`condition-${expression}`);
+			p.appendChild(t);
+			return p;
+		}
+
+		block.innerHTML = '';
+		for (const { feedback, verdict } of raw) block.appendChild(build(feedback, verdict));
+		updateWarn(fieldid, groupid, verdict);
+	}
+	function updateWarn(fieldid, groupid, fieldVerdict) {
+		const block = document.getElementById(`${blockHeader}${utos(groupid)}${fieldid}`),
+			blockWarned = block?.classList.contains(warn);
+
+		if (fieldVerdict === blockWarned) block.classList.toggle(warn);
+		if (groupid && getEntry('group', groupid).required) {
+			const group = document.getElementById(`${groupHeader}${groupid}`),
+				groupWarned = group.classList.contains(warn),
+				groupVerdict = getEntry('verdict', groupid).group.verdict;
+			if ((!groupWarned && !groupVerdict) || (groupWarned && groupVerdict))
+				group.classList.toggle(warn);
+		}
+	}
+	function updatePreview(fieldid, groupid) {
+		const files = fieldData({ action: 'get' }, fieldid, groupid),
+			block = document.getElementById(`${inputPreview}${utos(groupid)}${fieldid}`);
 
 		let strings = ``;
 		for (const { base64, meta } of files) {
@@ -150,36 +233,79 @@
 		}
 		console.info('%c Preview ', 'background-color: indigo; color: skyblue; ', files);
 
-		ipBlock.innerHTML = strings;
+		block.innerHTML = strings;
 	}
-	function updateWarn(uid) {
-		const block = document.getElementById(`${blockHeader}${uid}`);
-		if (required[uid] && checkEmpty(uid)) block.classList.add(warn);
-		else block.classList.remove(warn);
-	}
-	function onFocus(uid) {
-		touched[uid] = true;
-		active[uid] = true;
-		updateWarn(uid);
-	}
-	function onBlur(uid) {
-		active[uid] = false;
-	}
-	async function updateField(event, uid) {
+	async function updateField(event, fieldid, groupid) {
+		let value = event.target.value;
 		if (event.type === 'drop' || event.target.files) {
-			console.info(`Hello! Looks like you're uploading a file!`, event.target.files);
-
-			data[uid] =
+			value =
 				event.type === 'drop' ? event.dataTransfer.files[0] : await getData(event.target.files);
-		} else {
-			data[uid] = event.target.value;
-		}
+		} else if (event.type === 'dropdown') value = event.data;
+		fieldData({ action: 'set', data: value }, fieldid, groupid);
 
-		if (required[uid]) updateWarn(uid);
-		if (validity[uid]) updateFeedback(uid);
-		if (preview[uid]) updatePreview(uid);
-		updateSave();
+		if (getEntry('preview', fieldid, groupid)) updatePreview(fieldid, groupid);
+		if (getEntry('validity', fieldid, groupid))
+			updateFeedback(fieldid, groupid, await checkValidity('field', fieldid, groupid));
+		else if (getEntry('required', fieldid, groupid))
+			updateWarn(
+				fieldid,
+				groupid,
+				!(getEntry('required', fieldid, groupid) && checkEmpty(fieldid, groupid))
+			);
+
+		updateSave(id, title, true, false);
+		updateDebug();
 	}
+	function updateDebug() {
+		debugData = JSON.stringify({ ...$FormStore }, null, 4);
+	}
+
+	async function onFocus(fieldid, groupid) {
+		setEntry('touched', true, fieldid, groupid);
+		setEntry('active', true, fieldid, groupid);
+		if (getEntry('redact', fieldid, groupid))
+			setEntry(
+				'value',
+				fieldData({ action: `exists` }, fieldid, groupid)
+					? fieldData({ action: 'get' }, fieldid, groupid)
+					: '',
+				fieldid,
+				groupid
+			);
+		if (getEntry('validity', fieldid, groupid)) {
+			const result = await checkValidity('field', fieldid, groupid);
+			if (!result.verdict) updateFeedback(fieldid, groupid, result);
+		} else if (getEntry('required', fieldid, groupid))
+			updateWarn(
+				fieldid,
+				groupid,
+				!(getEntry('required', fieldid, groupid) && checkEmpty(fieldid, groupid))
+			);
+		updateDebug();
+	}
+	function onBlur(fieldid, groupid) {
+		setEntry('active', false, fieldid, groupid);
+		if (getEntry('redact', fieldid, groupid)) setEntry('value', '[redacted]', fieldid, groupid);
+
+		updateDebug();
+	}
+
+	function fieldData(payload, fieldid, groupid) {
+		const dontSave = existsEntry('dontSave', fieldid, groupid),
+			verdict = dontSave || (payload.verdict !== undefined && payload.verdict);
+
+		if (['set', 'init'].includes(payload.action))
+			return verdict
+				? setEntry('dontSave', { verdict, data: payload.data }, fieldid, groupid)
+				: setEntry('data', payload.data, fieldid, groupid);
+		else if (payload.action === 'get')
+			return verdict
+				? getEntry('dontSave', fieldid, groupid).data
+				: getEntry('data', fieldid, groupid);
+		else if (payload.action === 'exists') return dontSave || existsEntry('data', fieldid, groupid);
+	}
+
+	// TO DO: Turn this feature into a service worker.
 	async function getData(input) {
 		let arr = [];
 		for (const file of Object.values(input)) {
@@ -196,7 +322,6 @@
 
 		return arr;
 	}
-
 	async function getBase64(file) {
 		return new Promise((resolve, reject) => {
 			const reader = new FileReader();
@@ -212,33 +337,71 @@
 		return blob;
 	}
 
-	function loadFields() {
-		section = fields.flat();
-		section.forEach((field) => {
-			data[field.uid];
-			active[field.uid] = false;
-			if (field.required) required[field.uid] = field.required;
-			if (field.validity) {
-				validity[field.uid] = field.validity;
-				verdict[field.uid] = false;
-			}
-			if (field.preview) preview[field.uid] = true;
-			if (field.redact) redact[field.uid] = true;
-			if (field.defaultValue) data[field.uid] = field.defaultValue;
+	function loadGroup(group) {
+		setEntry('group', group, group.uid);
+	}
+	async function loadField(field, group) {
+		const verdict = field.dontSave || group?.dontSave;
 
-			if (field.preview && data[field.uid]) updatePreview(field.uid);
-			if (field.dontSave) dontSave[field.uid] = true;
+		if (!fieldData({ action: 'exists' }, field.uid, group?.uid)) {
+			const blank = ['file'].includes(field.type) ? undefined : '',
+				data = field.defaultValue ? field.defaultValue : blank;
+			fieldData({ verdict, action: 'init', data }, field.uid, group?.uid);
+			setEntry('value', data, field.uid, group?.uid);
+		}
+		if (field.redact || (group && group.redact)) {
+			setEntry('redact', group ? group.redact : field.redact, field.uid, group?.uid);
+			setEntry('value', '[redacted]', field.uid, group?.uid);
+		} else {
+			setEntry(
+				'value',
+				fieldData({ verdict, action: 'exists' }, field.uid, group?.uid)
+					? fieldData({ verdict, action: 'get' }, field.uid, group?.uid)
+					: setEntry('value', '', field.uid, group?.uid),
+				field.uid,
+				group?.uid
+			);
+		}
+
+		setEntry('active', false, field.uid, group?.uid);
+		if (field.required || (group && group.required))
+			setEntry('required', group ? group.required : field.required, field.uid, group?.uid);
+
+		if (field.validity) {
+			setEntry('validity', field.validity, field.uid, group?.uid);
+			await checkValidity('field', field.uid, group?.uid);
+		}
+
+		if (field.preview) {
+			setEntry('preview', true, field.uid, group?.uid);
+			if (fieldData({ action: 'get' }, field.uid, group?.uid)) updatePreview(field.uid);
+		}
+	}
+	function loadAllFields() {
+		fields.forEach((block) => {
+			if (Array.isArray(block)) {
+				block.forEach((field, i) => {
+					if (i) loadField(field, block[0]);
+					else loadGroup(block[0]);
+				});
+			} else loadField(block);
 		});
 	}
 
-	onMount(async () => {
+	function utos(u) {
+		return u === undefined ? '' : u;
+	}
+
+	onMount(() => {
 		console.info(
 			'This app takes advantage of Sad Form technology.\nLearn more at https://sadform.com'
 		);
 		loading = false;
 
-		loadFields();
-		await getSave();
+		loadSave(id, title, true, false);
+		loadAllFields();
+		updateSave(id, title, true, false);
+		updateDebug();
 
 		if (fullscreen) section = fields[0];
 	});
@@ -247,147 +410,41 @@
 <!-- <svelte:window on:keydown={changePageShortcut} /> -->
 
 <div class="form-container" {id}>
-	{#if section && !loading}
+	{#if fields && !loading}
 		{#if !fullscreen}<h2>{title}</h2>{/if}
-		<form on:submit={(event) => event.preventDefault()}>
-			{#each section as field (field.uid)}
-				<div class="form-block" id={`${blockHeader}${field.uid}`}>
-					{#if !field.hidden}
-						{#if field.type && field.type === 'custom'}
-							<div>{fields.body}</div>
-						{:else}
-							<label for={`${inputHeader}${field.uid}`}>
-								{field.name}
-								{#if field.required}<em>*required</em>{/if}
-							</label>
-							{#if field.type === 'textarea'}
-								<textarea
-									id={`${inputHeader}${field.uid}`}
-									name={field.name}
-									placeholder={field.placeholder}
-									disabled={field.disabled}
-									aria-disabled={field.disabled}
-									value={redact[field.uid] && !active[field.uid] ? '[redacted]' : data[field.uid]}
-									on:focus={() => onFocus(field.uid)}
-									on:blur={() => onBlur(field.uid)}
-									on:input={async (event) => await updateField(event, field.uid)}
-								/>
-							{:else if field.type === 'file' && field.custom}
-								<!-- 
-								an alternative to creating an entirely separate button with drag drop handles
-
-								 ===== STYLE 1 (not sure how to handle preview)
-								1. create invisible input
-								2. custom styling underneath
-								3. wrap both in a div (for easy custom styling)
-
-								x. documentation on how to custom style
-
-
-								 ===== STYLE 2 (not sure how to handle preview)
-								1. button, drop off area from scratch
-								2. associated button handlers
-								3. associated drop off area handlers
-								4. 
-								
-							
-							-->
-								{#if field.preview}
-									<div id={`${inputPreview}${field.uid}`}>preview enabled</div>
-								{/if}
-								<!-- 
-                                handle case for images and documents
-                                    - should we have a preview option?
-                                        - if yes, how do we differentiate docs
-                                        - what type of docs can we preview?
-                                        - how do we preview those docs?
-                                > ANSWER:
-                                    - yes, there should be a preview option
-                                        - check filetype, PDF & images work fine
-                                        - cannot preview any docs
-                                        - online use gDocs. offline, use icon
-
-                                
-                                should we offer saving files offline?
-                                    - if yes, how do we save files offline?
-                                > ANSWER: 
-                                    to store, convert to base64; 
-                                    to read, convert to blob
-                                
-
-                                different API for
-                                    - image compression?
-                                    - file validation?
-                                        - file size
-                                        - file date
-                                        - file namingBLUE
-                                        - file structure..?
-                            -->
-								<button
-									name={field.name}
-									title={`click to choose ${field.multiple ? `files` : `a file`} or drag and drop ${
-										field.multiple ? `files` : `a file`
-									} onto the button`}
-									on:click={(event) => {
-										event.preventDefault();
-										document.getElementById(`${inputHeader}${field.uid}`).click();
-									}}
-									on:drop={null}
-									on:dragenter={null}
-									on:dragover={null}
-									on:dragleave={null}
-								>
-									{data[field.uid]
-										? data[field.uid].name
-										: `click to choose ${field.multiple ? `files` : `a file`}`}
-								</button>
-								<input
-									id={`${inputHeader}${field.uid}`}
-									name={field.name}
-									type={field.type}
-									accept={field.accept}
-									placeholder={field.placeholder}
-									disabled={field.disabled}
-									aria-disabled={field.disabled}
-									aria-hidden
-									style={`display: none`}
-									on:focus={() => onFocus(field.uid)}
-									on:blur={() => onBlur(field.uid)}
-									on:input={async (event) => await updateField(event, field.uid)}
-								/>
-							{:else}
-								<input
-									id={`${inputHeader}${field.uid}`}
-									name={field.name}
-									type={field.type}
-									accept={field.accept}
-									placeholder={field.placeholder}
-									disabled={field.disabled}
-									aria-disabled={field.disabled}
-									multiple={field.multiple ? true : null}
-									value={field.type === 'file'
-										? null
-										: redact[field.uid] && !active[field.uid]
-										? '[redacted]'
-										: data[field.uid]}
-									on:focus={() => onFocus(field.uid)}
-									on:blur={() => onBlur(field.uid)}
-									on:input={async (event) => await updateField(event, field.uid)}
+		<form autocomplete={autocomplete ? 'on' : 'off'}>
+			{#each fields as group (group)}
+				{#if Array.isArray(group)}
+					<div class="form-group" id={`${groupHeader}${group[0].uid}`}>
+						{#if !group[0].hideLabel}
+							<span aria-hidden>
+								{group[0].name}
+								{#if group[0].required}<em>*required</em>{/if}
+							</span>
+						{/if}
+						{#each group as field, i}
+							{#if i}
+								<Field
+									{field}
+									group={group[0]}
+									functions={{ onFocus, onBlur, updateField }}
+									cssnames={{ blockHeader, inputHeader, inputPreview, inputFeedback }}
 								/>
 							{/if}
+						{/each}
+						{#if group[0].feedback}
+							<div class="form-group-feedback" id={`${groupFeedback}${group[0].uid}`} />
 						{/if}
-					{/if}
-					{#if field.tooltip}
-						<div class="container-tooltip">{field.tooltip}</div>
-					{/if}
-					{#if field.validity}
-						<div class="container-validity" id={`${inputValidate}${field.uid}`} />
-					{/if}
-					{#if field.preview}
-						<div class="container-preview" id={`${inputPreview}${field.uid}`} />
-					{/if}
-				</div>
+					</div>
+				{:else}
+					<Field
+						field={group}
+						functions={{ onFocus, onBlur, updateField }}
+						cssnames={{ blockHeader, inputHeader, inputPreview, inputFeedback }}
+					/>
+				{/if}
 			{/each}
+			<input type="submit" on:click|preventDefault={submit} />
 		</form>
 		{#if debug}
 			<details>
@@ -395,11 +452,7 @@
 				<div>
 					<div>
 						<code>
-							{JSON.stringify(
-								{ data, required, validity, verdict, active, redact, touched, fields },
-								null,
-								4
-							)}
+							{debugData}
 						</code>
 					</div>
 				</div>
@@ -416,104 +469,3 @@
 		</div>
 	{/if}
 </div>
-
-<style>
-	* {
-		box-sizing: border-box;
-		width: 100%;
-
-		font-family: Verdana, Geneva, Tahoma, sans-serif;
-		font-size: 16px;
-		color: black;
-	}
-	.form-container {
-		width: 60%;
-	}
-	.form-container h2 {
-		font-size: 1.5em;
-		margin: 0;
-	}
-
-	.form-container,
-	form {
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: center;
-
-		gap: 1.5em;
-	}
-	.form-container {
-		margin: 2em;
-		padding: 3em;
-		border-radius: 1em;
-		background-color: lavender;
-	}
-	.form-block {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25em;
-	}
-	.form-block button {
-		font-family: inherit;
-		padding: 1em;
-		background-color: white;
-		border: solid 0.25em darkslategray;
-		border-radius: 0.25em;
-	}
-	.form-block input,
-	.form-block textarea {
-		padding: 1em;
-		background-color: white;
-		border: solid 0.25em darkslategray;
-		border-radius: 0.25em;
-	}
-	.form-block textarea {
-		height: 20em;
-		overflow-y: scroll;
-		resize: none;
-	}
-
-	/* DEBUG VIEW */
-	details {
-		margin-top: 3em;
-	}
-	summary {
-		padding: 1em 0.5em;
-		background-color: orange;
-		font-family: monospace;
-		font-weight: bold;
-	}
-	details div {
-		padding: 2em;
-	}
-	details div > div {
-		padding: 1em;
-		background-color: beige;
-	}
-	code {
-		width: 100%;
-		font-family: monospace;
-
-		white-space: pre-wrap; /* Since CSS 2.1 */
-		white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-		white-space: -pre-wrap; /* Opera 4-6 */
-		white-space: -o-pre-wrap; /* Opera 7 */
-		word-wrap: break-word; /* Internet Explorer 5.5+ */
-	}
-
-	@media only screen and (max-width: 400px) {
-		div.form-container {
-			width: 95% !important;
-			border-radius: 0.5em !important;
-			padding: 1em !important;
-		}
-	}
-
-	@media only screen and (min-width: 400px) and (max-width: 600px) {
-		div.form-container {
-			width: 85% !important;
-			border-radius: 0.5em !important;
-		}
-	}
-</style>
