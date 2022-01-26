@@ -5,6 +5,9 @@
     font-size: 16px;
     color: black;
 }
+#svelte-forms *:focus {
+    outline-color: lightskyblue !important; outline: 0.25em solid; 
+}
 #svelte-forms .form-container h2 {
     font-size: 1.5em;
     margin: 0;
@@ -33,25 +36,36 @@ form {
     flex-direction: column;
     gap: 0.25em;
 }
-#svelte-forms .form-block button {
-    font-family: inherit;
-    padding: 1em;
-    background-color: white;
-    border: solid 0.25em darkslategray;
-    border-radius: 0.25em;
-}
-#svelte-forms .form-block input,
-#svelte-forms .form-block textarea {
+#svelte-forms input,
+#svelte-forms textarea,
+#svelte-forms .dropdown {
     width: 100%;
     padding: 1em;
     background-color: white;
     border: solid 0.25em darkslategray;
     border-radius: 0.25em;
 }
-#svelte-forms .form-block textarea {
+#svelte-forms textarea {
     height: 20em;
     overflow-y: scroll;
     resize: none;
+}
+#svelte-forms .dropdown-container { border-radius: 0.25em; }
+#svelte-forms .dropdown,
+#svelte-forms .option {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+#svelte-forms .option { padding: .5em 1.25em; }
+#svelte-forms .option:hover { background-color: lightgray; }
+#svelte-forms .option.active { outline-color: lightskyblue !important; outline: 0.25em solid; }
+#svelte-forms .option-container {
+    position: absolute;
+    width: 100%;
+    background-color: lavenderblush;
+    z-index: 1;
 }
 #svelte-forms .form-group {
     width: 100%;

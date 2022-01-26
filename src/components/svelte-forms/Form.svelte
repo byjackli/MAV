@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Extensions from './extensions.json';
 	import Field from './Field.svelte';
+	import NameStore from './NameStore';
 	import FormStore, {
 		setEntry,
 		getEntry,
@@ -45,15 +46,6 @@
 	export function spit() {
 		return $FormStore;
 	}
-
-	// CUSTOMIZATION FEATURES (CSS NAMES)
-	const warn = 'warn',
-		blockHeader = 'form:block/',
-		inputHeader = 'form:input/',
-		inputFeedback = 'form:input-feedback/',
-		inputPreview = 'form:input-preview/',
-		groupHeader = 'form:group/',
-		groupFeedback = 'form:group-feedback/';
 
 	// function changePage(value) {
 	//     const navShow = this.state.navShow,
@@ -185,10 +177,10 @@
 	async function updateFeedback(fieldid, groupid, validation) {
 		const groupOnly = groupid && getEntry('group', groupid).feedback;
 		let { verdict, raw } = validation,
-			block = document.getElementById(`${inputFeedback}${utos(groupid)}${fieldid}`);
+			block = document.getElementById(`${$NameStore.inputFeedback}${utos(groupid)}${fieldid}`);
 
 		if (groupOnly) {
-			block = document.getElementById(`${groupFeedback}${groupid}`);
+			block = document.getElementById(`${$NameStore.groupFeedback}${groupid}`);
 			raw = getEntry('verdict', groupid).group.raw;
 		}
 
@@ -206,21 +198,21 @@
 		updateWarn(fieldid, groupid, verdict);
 	}
 	function updateWarn(fieldid, groupid, fieldVerdict) {
-		const block = document.getElementById(`${blockHeader}${utos(groupid)}${fieldid}`),
-			blockWarned = block?.classList.contains(warn);
+		const block = document.getElementById(`${$NameStore.blockHeader}${utos(groupid)}${fieldid}`),
+			blockWarned = block?.classList.contains($NameStore.warn);
 
-		if (fieldVerdict === blockWarned) block.classList.toggle(warn);
+		if (fieldVerdict === blockWarned) block.classList.toggle($NameStore.warn);
 		if (groupid && getEntry('group', groupid).required) {
-			const group = document.getElementById(`${groupHeader}${groupid}`),
-				groupWarned = group.classList.contains(warn),
+			const group = document.getElementById(`${$NameStore.groupHeader}${groupid}`),
+				groupWarned = group.classList.contains($NameStore.warn),
 				groupVerdict = getEntry('verdict', groupid).group.verdict;
 			if ((!groupWarned && !groupVerdict) || (groupWarned && groupVerdict))
-				group.classList.toggle(warn);
+				group.classList.toggle($NameStore.warn);
 		}
 	}
 	function updatePreview(fieldid, groupid) {
 		const files = fieldData({ action: 'get' }, fieldid, groupid),
-			block = document.getElementById(`${inputPreview}${utos(groupid)}${fieldid}`);
+			block = document.getElementById(`${$NameStore.inputPreview}${utos(groupid)}${fieldid}`);
 
 		let strings = ``;
 		for (const { base64, meta } of files) {
@@ -415,33 +407,24 @@
 		<form autocomplete={autocomplete ? 'on' : 'off'}>
 			{#each fields as group (group)}
 				{#if Array.isArray(group)}
-					<div class="form-group" id={`${groupHeader}${group[0].uid}`}>
+					<div role="group" class="form-group" id={`${$NameStore.groupHeader}${group[0].uid}`}>
 						{#if !group[0].hideLabel}
-							<span aria-hidden>
+							<legend>
 								{group[0].name}
 								{#if group[0].required}<em>*required</em>{/if}
-							</span>
+							</legend>
 						{/if}
 						{#each group as field, i}
 							{#if i}
-								<Field
-									{field}
-									group={group[0]}
-									functions={{ onFocus, onBlur, updateField }}
-									cssnames={{ blockHeader, inputHeader, inputPreview, inputFeedback }}
-								/>
+								<Field {field} group={group[0]} functions={{ onFocus, onBlur, updateField }} />
 							{/if}
 						{/each}
 						{#if group[0].feedback}
-							<div class="form-group-feedback" id={`${groupFeedback}${group[0].uid}`} />
+							<div class="form-group-feedback" id={`${$NameStore.groupFeedback}${group[0].uid}`} />
 						{/if}
 					</div>
 				{:else}
-					<Field
-						field={group}
-						functions={{ onFocus, onBlur, updateField }}
-						cssnames={{ blockHeader, inputHeader, inputPreview, inputFeedback }}
-					/>
+					<Field field={group} functions={{ onFocus, onBlur, updateField }} />
 				{/if}
 			{/each}
 			<input type="submit" on:click|preventDefault={submit} />

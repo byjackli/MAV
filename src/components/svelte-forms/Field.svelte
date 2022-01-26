@@ -1,30 +1,30 @@
 <script lang="ts">
 	import Dropdown from './Dropdown.svelte';
 	import FormStore from './FormStore';
+	import NameStore from './NameStore'
 	import type { Field, Group } from './types/Form';
 
 	export let field: Field,
 		group: Group = undefined,
-		functions: Record<string, Function>,
-		cssnames: Record<string, string>;
+		functions: Record<string, Function>;
 	let groupid = '';
 	(() => (groupid = group === undefined ? '' : group.uid))();
 </script>
 
-<div class={`form-block type:${field.type}`} id={`${cssnames.blockHeader}${groupid}${field.uid}`}>
+<div class={`form-block type:${field.type}`} id={`${$NameStore.blockHeader}${groupid}${field.uid}`}>
 	{#if !field.hidden}
 		{#if field.type && field.type === 'custom'}
 			<div>{field.body}</div>
 		{:else}
 			{#if !field.hideLabel}
-				<label for={`${cssnames.inputHeader}${groupid}${field.uid}`}>
+				<label id={`${$NameStore.label}${groupid}${field.uid}`} for={`${$NameStore.inputHeader}${groupid}${field.uid}`}>
 					{field.name}
 					{#if field.required}<em>*required</em>{/if}
 				</label>
 			{/if}
 			{#if field.type === 'textarea'}
 				<textarea
-					id={`${cssnames.inputHeader}${groupid}${field.uid}`}
+					id={`${$NameStore.inputHeader}${groupid}${field.uid}`}
 					name={field.name}
 					placeholder={field.placeholder}
 					disabled={field.disabled}
@@ -38,14 +38,14 @@
 				/>
 			{:else if field.type === 'file' && field.custom}
 				<button
-					id={`${cssnames.inputHeader}${groupid}${field.uid}`}
+					id={`${$NameStore.inputHeader}${groupid}${field.uid}`}
 					name={field.name}
 					title={`click to choose ${field.multiple ? `files` : `a file`} or drag and drop ${
 						field.multiple ? `files` : `a file`
 					} onto the button`}
 					on:click={(event) => {
 						event.preventDefault();
-						document.getElementById(`${cssnames.inputHeader}${field.uid}`).click();
+						document.getElementById(`${$NameStore.inputHeader}${field.uid}`).click();
 					}}
 					on:drop={null}
 					on:dragenter={null}
@@ -57,7 +57,7 @@
 						: `click to choose ${field.multiple ? `files` : `a file`}`}
 				</button>
 				<input
-					id={`${cssnames.inputHeader}${groupid}${field.uid}`}
+					id={`${$NameStore.inputHeader}${groupid}${field.uid}`}
 					name={field.name}
 					type={field.type}
 					accept={field.accept}
@@ -72,7 +72,7 @@
 				/>
 			{:else if ['dropdown', 'radio', 'checkbox'].includes(field.type)}
 				<Dropdown
-					id={`${cssnames.inputHeader}${groupid}${field.uid}`}
+					id={`${groupid}${field.uid}`}
 					name={field.name}
 					type={field.type}
 					placeholder={field.placeholder}
@@ -90,7 +90,7 @@
 				/>
 			{:else}
 				<input
-					id={`${cssnames.inputHeader}${groupid}${field.uid}`}
+					id={`${$NameStore.inputHeader}${groupid}${field.uid}`}
 					name={field.name}
 					type={field.type}
 					accept={field.accept}
@@ -115,12 +115,12 @@
 		<div class="container-tooltip">{field.tooltip}</div>
 	{/if}
 	{#if field.validity}
-		<div class="container-validity" id={`${cssnames.inputFeedback}${groupid}${field.uid}`} />
+		<div class="container-validity" id={`${$NameStore.inputFeedback}${groupid}${field.uid}`} />
 	{/if}
 	{#if field.preview}
 		<div
 			class={`container-preview ${field.redact ? 'redact-preview' : ''}`}
-			id={`${cssnames.inputPreview}${groupid}${field.uid}`}
+			id={`${$NameStore.inputPreview}${groupid}${field.uid}`}
 		/>
 	{/if}
 </div>

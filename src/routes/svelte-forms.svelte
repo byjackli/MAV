@@ -309,7 +309,7 @@
 					uid: 'mydropdown',
 					name: 'Favorite Ice Cream Brand',
 					type: 'dropdown',
-					multiple: true,
+					multiple: false,
 					placeholder: 'Klondike bar',
 					dontSave: true,
 					required: true,
