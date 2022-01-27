@@ -307,12 +307,13 @@
 				],
 				{
 					uid: 'mydropdown',
-					name: 'Favorite Ice Cream Brand',
+					name: 'Favorite Ice Cream Brand(s)',
 					type: 'dropdown',
-					multiple: false,
-					placeholder: 'Klondike bar',
-					dontSave: true,
+					multiple: true,
+					dontSave: false,
 					required: true,
+					redact: true,
+					compact: true,
 					options: [
 						{ uid: 'option1', name: 'Klondike bar' },
 						{ uid: 'option2', name: "Ben & Jerry's" },
@@ -321,6 +322,30 @@
 						{ uid: 'option5', name: 'Turkey Hill' },
 						{ uid: 'option6', name: 'Dairy Queen' }
 					]
+				},
+				{
+					uid: 'mydropdown2',
+					name: 'Favorite Car',
+					type: 'dropdown',
+					dontSave: false,
+					required: true,
+					placeholder: 'You can only pick one.',
+					options: [
+						{ uid: 'option1', name: 'Honda Odyssey' },
+						{ uid: 'option2', name: 'Nissan GTR R34' },
+						{ uid: 'option3', name: 'Corvette CR1' },
+						{ uid: 'option4', name: 'Corvette CR4' },
+						{ uid: 'option5', name: 'F-150 Lightning' },
+						{ uid: 'option6', name: 'Nissan Altima' }
+					]
+				},
+				{
+					uid: 'mycheckbox',
+					name: 'Should I bring my camera?',
+					type: 'checkbox',
+					redact: true,
+					placeholder: 'errrr',
+					options: [{ uid: 'ok', name: 'yes' }]
 				}
 			]}
 		/>

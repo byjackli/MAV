@@ -127,7 +127,9 @@
 
 	function checkEmpty(fieldid, groupid) {
 		const field = fieldData({ action: 'get' }, fieldid, groupid);
-		return field === '' || field === undefined || field === null;
+		return (
+			field === '' || field === undefined || field === null || Object.entries(field).length === 0
+		);
 	}
 
 	export async function checkValidity(type, fieldid, groupid) {
@@ -228,12 +230,14 @@
 		block.innerHTML = strings;
 	}
 	async function updateField(event, fieldid, groupid) {
-		let value = event.target.value;
-		if (event.type === 'drop' || event.target.files) {
-			value =
+		let data = event.target.value;
+		if (event.type === 'drop' || event?.target?.files) {
+			data =
 				event.type === 'drop' ? event.dataTransfer.files[0] : await getData(event.target.files);
-		} else if (event.type === 'dropdown') value = event.data;
-		fieldData({ action: 'set', data: value }, fieldid, groupid);
+		}
+
+		fieldData({ action: 'set', data }, fieldid, groupid);
+		fieldValue(fieldid, groupid);
 
 		if (getEntry('preview', fieldid, groupid)) updatePreview(fieldid, groupid);
 		if (getEntry('validity', fieldid, groupid))
@@ -255,15 +259,7 @@
 	async function onFocus(fieldid, groupid) {
 		setEntry('touched', true, fieldid, groupid);
 		setEntry('active', true, fieldid, groupid);
-		if (getEntry('redact', fieldid, groupid))
-			setEntry(
-				'value',
-				fieldData({ action: `exists` }, fieldid, groupid)
-					? fieldData({ action: 'get' }, fieldid, groupid)
-					: '',
-				fieldid,
-				groupid
-			);
+		if (getEntry('redact', fieldid, groupid)) fieldValue(fieldid, groupid);
 		if (getEntry('validity', fieldid, groupid)) {
 			const result = await checkValidity('field', fieldid, groupid);
 			if (!result.verdict) updateFeedback(fieldid, groupid, result);
@@ -278,7 +274,6 @@
 	function onBlur(fieldid, groupid) {
 		setEntry('active', false, fieldid, groupid);
 		if (getEntry('redact', fieldid, groupid)) setEntry('value', '[redacted]', fieldid, groupid);
-
 		updateDebug();
 	}
 
@@ -295,6 +290,21 @@
 				? getEntry('dontSave', fieldid, groupid).data
 				: getEntry('data', fieldid, groupid);
 		else if (payload.action === 'exists') return dontSave || existsEntry('data', fieldid, groupid);
+	}
+	function fieldValue(fieldid, groupid, verdict) {
+		const exists = fieldData({ verdict, action: 'exists' }, fieldid, groupid);
+		let data;
+
+		if (exists) {
+			data = fieldData({ verdict, action: 'get' }, fieldid, groupid);
+
+			if (typeof data === 'object') {
+				const array = Object.values(data);
+				data = array;
+			}
+		} else data = '';
+
+		setEntry('value', data, fieldid, groupid);
 	}
 
 	// TO DO: Turn this feature into a service worker.
@@ -329,6 +339,11 @@
 		return blob;
 	}
 
+	function loadBlank(type) {
+		if (type === 'dropdown') return {};
+		else if (type === 'file') return undefined;
+		else return '';
+	}
 	function loadGroup(group) {
 		setEntry('group', group, group.uid);
 	}
@@ -336,24 +351,14 @@
 		const verdict = field.dontSave || group?.dontSave;
 
 		if (!fieldData({ action: 'exists' }, field.uid, group?.uid)) {
-			const blank = ['file'].includes(field.type) ? undefined : '',
-				data = field.defaultValue ? field.defaultValue : blank;
+			const data = field.defaultValue ? field.defaultValue : loadBlank(field.type);
 			fieldData({ verdict, action: 'init', data }, field.uid, group?.uid);
 			setEntry('value', data, field.uid, group?.uid);
 		}
 		if (field.redact || (group && group.redact)) {
 			setEntry('redact', group ? group.redact : field.redact, field.uid, group?.uid);
 			setEntry('value', '[redacted]', field.uid, group?.uid);
-		} else {
-			setEntry(
-				'value',
-				fieldData({ verdict, action: 'exists' }, field.uid, group?.uid)
-					? fieldData({ verdict, action: 'get' }, field.uid, group?.uid)
-					: setEntry('value', '', field.uid, group?.uid),
-				field.uid,
-				group?.uid
-			);
-		}
+		} else fieldValue(field.uid, group?.uid, verdict);
 
 		setEntry('active', false, field.uid, group?.uid);
 		if (field.required || (group && group.required))

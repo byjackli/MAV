@@ -1,7 +1,8 @@
 <script lang="ts">
-	import Dropdown from './Dropdown.svelte';
 	import FormStore from './FormStore';
-	import NameStore from './NameStore'
+	import NameStore from './NameStore';
+	import Checkbox from './Checkbox.svelte';
+	import Dropdown from './Dropdown.svelte';
 	import type { Field, Group } from './types/Form';
 
 	export let field: Field,
@@ -17,7 +18,10 @@
 			<div>{field.body}</div>
 		{:else}
 			{#if !field.hideLabel}
-				<label id={`${$NameStore.label}${groupid}${field.uid}`} for={`${$NameStore.inputHeader}${groupid}${field.uid}`}>
+				<label
+					id={`${$NameStore.label}${groupid}${field.uid}`}
+					for={`${$NameStore.inputHeader}${groupid}${field.uid}`}
+				>
 					{field.name}
 					{#if field.required}<em>*required</em>{/if}
 				</label>
@@ -70,7 +74,7 @@
 					on:blur={() => functions.onBlur(field.uid, group?.uid)}
 					on:input={async (event) => await functions.updateField(event, field.uid, group?.uid)}
 				/>
-			{:else if ['dropdown', 'radio', 'checkbox'].includes(field.type)}
+			{:else if ['dropdown', 'radio'].includes(field.type)}
 				<Dropdown
 					id={`${groupid}${field.uid}`}
 					name={field.name}
@@ -78,14 +82,29 @@
 					placeholder={field.placeholder}
 					disabled={field.disabled}
 					multiple={field.multiple}
+					compact={field.compact}
 					options={field.options}
-					value={field.type === 'file'
-						? null
-						: group === undefined
+					value={group === undefined
 						? $FormStore.value[field.uid]
 						: $FormStore.value[group.uid][field.uid]}
+					data={group === undefined
+						? $FormStore.data[field.uid]
+						: $FormStore.data[group.uid][field.uid]}
 					focus={() => functions.onFocus(field.uid, group?.uid)}
 					blur={() => functions.onBlur(field.uid, group?.uid)}
+					input={async (event) => await functions.updateField(event, field.uid, group?.uid)}
+				/>
+			{:else if field.type === 'checkbox'}
+				<Checkbox
+					id={`${groupid}${field.uid}`}
+					name={field.name}
+					type={field.type}
+					placeholder={field.placeholder}
+					disabled={field.disabled}
+					redact={field.redact}
+					data={group === undefined
+						? $FormStore.data[field.uid]
+						: $FormStore.data[group.uid][field.uid]}
 					input={async (event) => await functions.updateField(event, field.uid, group?.uid)}
 				/>
 			{:else}
@@ -119,7 +138,7 @@
 	{/if}
 	{#if field.preview}
 		<div
-			class={`container-preview ${field.redact ? 'redact-preview' : ''}`}
+			class={`container-preview ${field.redact ? $NameStore.redact : ''}`}
 			id={`${$NameStore.inputPreview}${groupid}${field.uid}`}
 		/>
 	{/if}

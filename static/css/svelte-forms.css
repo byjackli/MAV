@@ -38,7 +38,8 @@ form {
 }
 #svelte-forms input,
 #svelte-forms textarea,
-#svelte-forms .dropdown {
+#svelte-forms .dropdown, 
+#svelte-forms .checkbox {
     width: 100%;
     padding: 1em;
     background-color: white;
@@ -51,7 +52,8 @@ form {
     resize: none;
 }
 #svelte-forms .dropdown-container { border-radius: 0.25em; }
-#svelte-forms .dropdown,
+#svelte-forms .dropdown, 
+#svelte-forms .checkbox,
 #svelte-forms .option {
     display: flex;
     flex-direction: row;
@@ -67,9 +69,32 @@ form {
     background-color: lavenderblush;
     z-index: 1;
 }
+#svelte-forms .dropdown-container .option-empty:not(.redact) { color: grey; }
 #svelte-forms .form-group {
     width: 100%;
 }
+#svelte-forms .checkbox.redact::after {    
+    content: '[redacted]';
+    color: darkblue;    
+    font-weight: bold;
+    text-align: center; 
+    
+    position: absolute;
+    background-color: orange;
+    padding: 1em;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    box-sizing: border-box;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+#svelte-forms .checkbox.redact:hover::after, 
+#svelte-forms .checkbox.redact:focus::after 
+{ display: none; }
 
 /* DEBUG VIEW */
 #svelte-forms details {
@@ -107,7 +132,7 @@ form {
 .form-block.warn label, .form-block.warn label * {
 	color: red !important;
 }
-.form-block.warn input, .form-block.warn textarea {
+.form-block.warn input, .form-block.warn textarea, .form-block.warn .dropdown {
 	border-color: red !important;
 }
 
@@ -153,9 +178,9 @@ form {
     overflow: hidden;
     display: inline-block;
 }
-#svelte-forms .redact-preview::after {    
+#svelte-forms .container-preview.redact::after {    
     content: '[redacted]';
-    color: darkblue;
+    color: darkblue;    
     font-weight: bold;
     text-align: center;
     

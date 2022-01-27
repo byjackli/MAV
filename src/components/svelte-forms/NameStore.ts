@@ -3,6 +3,7 @@ import { belongs } from './FormStore'
 
 const names = {
     warn: 'warn',
+    redact: 'redact',
     label: 'label',
     blockHeader: 'form:block/',
     inputHeader: 'form:input/',

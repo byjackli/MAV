@@ -24,6 +24,7 @@ export type Field = {
     autocomplete?: string,
     preview?: boolean,
     multiple?: boolean,
+    compact?: boolean,
     options?: [{ uid: string, name: string }],
     accept?: string,
     custom?: boolean,
