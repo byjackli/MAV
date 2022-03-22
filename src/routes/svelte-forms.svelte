@@ -31,6 +31,19 @@
 
 <div class="container" id="svelte-forms">
 	<h1>Forms on Svelte</h1>
+	<br />
+	<p>
+		UPDATE: This project has now matured into its own full blown <a
+			href="https://github.com/byjackli/sadforms"
+			rel="noreferrer">repository</a
+		>.
+	</p>
+	<br />
+	<p>
+		I am excited to share <a href="https://sadforms.com" rel="noreferrer">Sad Forms</a> with you! It
+		is a Svelte Form package and a form builder tool!
+	</p>
+	<br />
 	<button on:click={() => (toggleForm = !toggleForm)}>Toggle Form</button>
 	<button on:click={printContents}>Print Deets to Console</button>
 
@@ -100,7 +113,7 @@
 	<div>
 		<button on:click={toggleCreate}> create form + </button>
 		{#if createForm}
-			<svelte:component this={cfContainer} />
+			<!-- <svelte:component this={cfContainer} /> -->
 		{/if}
 	</div>
 	{#if toggleForm}
