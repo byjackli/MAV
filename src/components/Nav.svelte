@@ -23,6 +23,9 @@
 			<a href="/color-builder" title="Color Builder">Color Builder</a>
 		</li>
 		<li>
+			<a href="/products" title="Products">Products</a>
+		</li>
+		<li>
 			<a
 				class="disabled"
 				title="coming soon"
