@@ -39,6 +39,7 @@
 				<a title="Branched off." href="/svelte-forms">Svelte Forms</a>
 				<a title="On hold." href="/color-builder">Color Builder</a>
 				<a title="Work in progress." href="/products">Products</a>
+				<a title="Work in progress." href="/modals">Modals</a>
 				<a
 					class="disabled"
 					title="coming soon"

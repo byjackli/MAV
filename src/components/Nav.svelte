@@ -26,6 +26,9 @@
 			<a href="/products" title="Products">Products</a>
 		</li>
 		<li>
+			<a href="/modals" title="Modals">Modals</a>
+		</li>
+		<li>
 			<a
 				class="disabled"
 				title="coming soon"
