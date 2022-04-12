@@ -1,10 +1,10 @@
 <script lang="ts">
-	// import { onMount } from 'svelte';
-	// import initModal from '../components/modals/modals-lite';
+	import { afterUpdate } from 'svelte';
+	import initModal from '../components/modals/modals-lite';
 
-	// onMount(() => {
-	// 	initModal();
-	// });
+	afterUpdate(() => {
+		initModal();
+	});
 </script>
 
 <svelte:head>
@@ -32,7 +32,7 @@
 		rel="stylesheet"
 	/>
 
-	<script src="../static/modals/modals-lite"/>
+	<script src="../static/modals/modals-lite"></script>
 </svelte:head>
 
 <div class="container" id="modals">
@@ -52,7 +52,7 @@
 		<h2>modal stuff</h2>
 		<div>
 			<button class="modal-open">open modal</button>
-			<dialog>
+			<div role="dialog">
 				<button class="modal-close">close</button>
 				<p>the modal</p>
 				<input type="text" />
@@ -63,25 +63,25 @@
 				<input type="text" />
 				<div>
 					<button class="modal-open">modal 1</button>
-					<dialog>
+					<div role="dialog">
 						<button class="modal-close">close</button>
 						<p>nested modal 1</p>
 						<input type="text" />
 						<input type="text" />
 						<input type="text" />
 						<input type="text" />
-					</dialog>
+					</div>
 				</div>
 				<div>
 					<button class="modal-open">second modal</button>
-					<dialog>
+					<div role="dialog">
 						<button class="modal-close">close</button>
 						<p>nested modal 2</p>
 						<input type="text" />
 						<input type="text" />
-					</dialog>
+					</div>
 					<button class="modal-open">modal no3</button>
-					<dialog>
+					<div role="dialog">
 						<p>😊 auto-generated close button</p>
 						<input type="text" />
 						<input type="text" />
@@ -95,9 +95,9 @@
 						<input type="text" />
 						<input type="text" />
 						<input type="text" />
-					</dialog>
+					</div>
 				</div>
-			</dialog>
+			</div>
 		</div>
 	</section>
 </div>
