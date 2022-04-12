@@ -6,13 +6,12 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		target: '#root',
 		adapter: adapter({ fallback: "index.html" }),
 		vite: {
 			ssr: {
 				external: ['firebase']
 			}
-		}
+		},
 	}
 };
 

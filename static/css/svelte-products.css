@@ -1,0 +1,125 @@
+#products section { min-height: 100vh; }
+
+#products div.card * {
+    font-size: .8rem;
+    color: #989898;
+}
+#products div.card {
+    width: 288px;
+    height: 456px;
+    background-color: white;
+    padding: .5em;
+
+    border: solid 2px black;
+    border-radius: 1.25rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: .75em;
+}
+#products div.top,
+#products div.bot {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#products div.top div.bar,
+#products div.top div.bar > div { 
+    display: flex;
+    flex-direction: row; 
+    gap: .5rem;
+}
+#products div.top div.bar {
+    width: 100%;
+    padding-bottom: 1rem;
+    justify-content: space-between;
+}
+#products button {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5em;
+}
+#products button.likes {
+    background-color: #D9D9D9;
+    padding: 0.15rem 0.5rem;
+    border-radius: 69rem;
+}
+#products button.likes * { color: black; }
+#products button.help * {
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 1.2rem !important;
+}
+#products button.help { background-color: transparent; }
+#products div.card img { width: 100%; }
+#products div.card.back { background-color: black; }
+#products .back button.help * { color: rgba(256, 256, 256, 0.7); }
+#products div.image-container {
+    height: 12em;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: white;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+}
+
+#products div.cta { padding-top: .75rem; }
+#products div.pad { padding: 0 .75em;}
+#products div.bot { 
+    justify-content: flex-end;
+    overflow: hidden;
+}
+#products div.card span.title {
+    width: 100%;
+
+    overflow: hidden;
+
+    color: #989898;
+    font-weight: bold;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+}
+#products div.card.back span.title {
+    overflow: unset;
+    text-overflow: unset;
+    -webkit-line-clamp: unset;
+}
+#products div.cta {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .5em;
+}
+#products div.cta button {
+    width: 100%;
+    padding: 0.25rem 0.5rem;
+    background-color: #D9D9D9;
+
+    border-radius: 69rem;
+}
+#products div.cta button * { color: black; }
+#products div.card.back div.pad { overflow-y: auto }
+#products div.card.back div.pad p { white-space: pre-line; }
+#products div.cta button.highlight { background-color: #D1BF1B; }
+
+
+#products div.feed {
+    padding: 2rem;
+    
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+    justify-content: center;
+}
