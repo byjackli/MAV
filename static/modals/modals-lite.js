@@ -1,4 +1,3 @@
-
 let listener = undefined,       // status of "click" event listener on body
     body = undefined,           // HTMLElement of document body
     modalManager = undefined,   // HTMLElement containing all active modals
@@ -11,7 +10,7 @@ let listener = undefined,       // status of "click" event listener on body
 
 // setp up automatic modal manager
 function init() {
-    if (!body) body = document.getElementsByTagName('body')[0];
+    if (!body) body = document.getElementsByTagName('html')[0];
     if (!listener) listener = body.addEventListener('click', observeClicks);
     if (!modalManager && !document.getElementById('modal-manager')) {
         modalManager = createModalManager();
@@ -70,8 +69,8 @@ function createBackdrop() {
 
 // toggle aria-hide for all other elements
 function ariaHideRest(bool) {
-    const children = body.children;
-    for (let i = 1; i < children.length; i++) children[i].setAttribute('aria-hidden', `${bool}`);
+    const body = document.getElementsByTagName('body')[0];
+    body.setAttribute('aria-hidden', `${bool}`);
 }
 
 // return a list of focusable elements baed on passed in modal (html element)
@@ -80,7 +79,7 @@ function updateFocusable(modal) {
     const modals = modal.querySelectorAll('dialog'),
         temp = [];
     for (const modal of modals) {
-        temp.push({ parent: modal.parentElement, modal });
+        temp.push({ sibling: modal.previousElementSibling, modal });
         modal.remove();
     }
 
@@ -97,7 +96,7 @@ function updateFocusable(modal) {
     ];
 
     // re-add nested dialogs
-    for (const { parent, modal } of temp) parent.append(modal);
+    for (const { sibling, modal } of temp) sibling.after(modal);
 }
 function openModal(openBtn) {
     trackDepth += 1; //
@@ -105,8 +104,21 @@ function openModal(openBtn) {
         modal = openBtn.nextElementSibling,
         backdrop = createBackdrop();
 
+    if (!modal.querySelectorAll('.modal-close').length) {
+        const content = document.createTextNode('close modal'),
+            ariaClose = document.createElement('button');
+
+        ariaClose.appendChild(content);
+        ariaClose.setAttribute('class', 'modal-close');
+        ariaClose.setAttribute('style', 'position: absolute; top: -75px; right: 0;');
+        modal.prepend(ariaClose);
+    }
     updateFocusable(modal);
     if (trackDepth < 2) body.addEventListener('keydown', trapFocus);
+    if (!modal.querySelectorAll(".close-modal")) {
+        backdrop.setAttribute("tabindex", "0")
+        backdrop.setAttribute("aria-label", "Close modal.")
+    }
 
     modal.remove();                             // remove modal from where its original location
 
@@ -133,17 +145,17 @@ function closeModal() {
         backdrop = trackBackdrop.pop();
 
     modal.close();
-    if (!trackDepth) {
+    // if there are still modals, update focusable
+    if (trackDepth) updateFocusable(trackModal[trackDepth - 1]);
+    else {
         // remove all listeners no modals are active
         body.removeEventListener('keydown', trapFocus);
         backdrop.removeEventListener('click', closeModal);
+        ariaHideRest(false);
     }
     backdrop.remove();
     button.after(modal); // put modal back where it was found
 
-    ariaHideRest(false);
-    // if there are still modals, update focusable
-    if (trackDepth) updateFocusable(trackModal[trackDepth - 1]);
     resume.focus();
 }
 
