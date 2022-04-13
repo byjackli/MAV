@@ -5,6 +5,7 @@ let body = undefined,           // HTMLElement of document body
     trackBackdrop = [],         // treated as stack
     trackModal = [],            // treated as stack
     trackResume = [],           // treated as stack
+    trackScrollLock = [],       // position of scroll before locking
     focusable = undefined;      // list of focusable elements
 
 // setp up automatic modal manager
@@ -15,39 +16,18 @@ function init() {
         modalManager = createModalManager();
         body.prepend(modalManager);
     }
-    if (!document.getElementById('modal-css')) initCSS()
+    if (!document.getElementById('modal-css')) createCSSManager()
     hideModals()
-}
-
-// create CSS classes
-function initCSS() {
-    const styles = document.createTextNode(`
-        .modal-inactive { display: none !important; }
-        a.modal-close {
-            padding: 10px;
-            color: white;
-            font-size: 16px;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-    `),
-        styleNode = document.createElement("style"),
-        head = document.getElementsByTagName("head")[0];
-
-    styleNode.setAttribute("id", "modal-css")
-    styleNode.appendChild(styles)
-    head.appendChild(styleNode)
 }
 
 function hideModals() {
     const modals = Array.from(document.querySelectorAll(`*[role="dialog"]`))
 
-    for (const modal of modals) {
+    for (const modal of modals)
         if (!modal.classList.contains("modal-inactive")) {
             modal.classList.add("modal-inactive")
             modal.setAttribute("aria-hidden", "true")
         }
-    }
 }
 
 // listens for click events on modal open and close buttons
@@ -80,6 +60,26 @@ function trapFocus(event) {
     }
 }
 
+// create CSS classes
+function createCSSManager() {
+    const styles = document.createTextNode(`
+        .modal-inactive { display: none !important; }
+        .modal-scroll-locked { overflow: hidden !important; }
+        a.modal-close {
+            padding: 10px;
+            color: white;
+            font-size: 16px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    `),
+        styleNode = document.createElement("style"),
+        head = document.getElementsByTagName("head")[0];
+
+    styleNode.setAttribute("id", "modal-css")
+    styleNode.appendChild(styles)
+    head.appendChild(styleNode)
+}
 // Modal Manager houses all active modals and their respective backdrops
 function createModalManager() {
     const div = document.createElement('div');
@@ -109,12 +109,30 @@ function createCloseBtn() {
     return ariaClose
 }
 
+// locks and unlocks previous layer from scrolling
+function scrollLock(state) {
+    if (state) {
+        const scrollLock = Array.from(document.querySelectorAll(".modal-scroll-lock"))
+        for (const doc of scrollLock) {
+            trackScrollLock.push({ doc, top: doc.parentElement.scrollTop })
+            doc.parentElement.classList.add("modal-scroll-locked")
+        }
+    }
+    else {
+        for (const { doc, top } of trackScrollLock) {
+            doc.parentElement.classList.remove("modal-scroll-locked")
+            doc.parentElement.scrollTop = top
+        }
+        trackScrollLock = []
+    }
+
+
+}
 // toggle aria-hide for all other elements
 function ariaHideRest(bool) {
     const body = document.getElementsByTagName('body')[0];
     body.setAttribute('aria-hidden', `${bool}`);
 }
-
 // return a list of focusable elements baed on passed in modal (html element)
 function updateFocusable(modal) {
     // temporarily remove nested dialogs
@@ -140,6 +158,7 @@ function updateFocusable(modal) {
     // re-add nested dialogs
     for (const { sibling, modal } of temp) sibling.after(modal);
 }
+
 function openModal(openBtn) {
     trackDepth += 1; //
     const button = openBtn,
@@ -150,7 +169,10 @@ function openModal(openBtn) {
     if (!modal.querySelectorAll('.modal-close').length) modal.prepend(createCloseBtn());
 
     updateFocusable(modal);
-    if (trackDepth < 2) body.addEventListener('keydown', trapFocus);
+    if (trackDepth < 2) {                       // perform only when first modal is opened
+        body.addEventListener('keydown', trapFocus);
+        scrollLock(true);
+    }
     else pausePreviousModal()
 
     modal.remove();                             // remove modal from where its original location
@@ -185,14 +207,15 @@ function closeModal() {
     modal.classList.add("modal-inactive")       // hide modal from visual users
     modal.setAttribute("aria-hidden", "true")   // hide modal from assist tech
 
+    resume.focus();
+
     if (trackDepth) resumePreviousModal()       // if there are still modals, update focusable
-    else {                                      // remove all listeners when no modals are active
+    else {                                      // perform only when last modal is closed
         body.removeEventListener('keydown', trapFocus);
         backdrop.removeEventListener('click', closeModal);
+        scrollLock(false);
         ariaHideRest(false);
     }
-
-    resume.focus();
 }
 function pausePreviousModal() {
     trackModal[trackDepth - 2].setAttribute("aria-hidden", "true")
