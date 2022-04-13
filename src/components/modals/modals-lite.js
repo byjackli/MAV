@@ -17,11 +17,12 @@ function init() {
         body.prepend(modalManager);
     }
     if (!document.getElementById('modal-css')) createCSSManager()
-    hideModals()
+    hideModalThings()
 }
 
-function hideModals() {
-    const modals = Array.from(document.querySelectorAll(`*[role="dialog"]`))
+// hide modals and their backdrop(if they have one)
+function hideModalThings() {
+    const modals = Array.from(document.querySelectorAll(`*[role="dialog"], .modal-backdrop`))
 
     for (const modal of modals)
         if (!modal.classList.contains("modal-inactive")) {
@@ -32,13 +33,20 @@ function hideModals() {
 
 // listens for click events on modal open and close buttons
 function observeClicks(event) {
-    const openBtn = event.target.closest('.modal-open'),
-        closeBtn = event.target.closest('.modal-close');
+    const openBtn = event.target.closest('.modal-open');
 
-    if (closeBtn) closeModal();
-    if (!openBtn || closeBtn) return;
+    if (trackDepth) listenToCloseClicks(event);
+    if (openBtn) openModal(openBtn);
+}
+// handles click events not within modal
+function listenToCloseClicks(event) {
+    const closeBtn = event.target.closest('.modal-close'), clickedBackdrop = event.target.closest(".modal-backdrop"),
+        clickedModal = event.target.closest('*[role="dialog"]'),
+        clickedSelf = trackModal.indexOf(clickedModal) === trackModal.length - 1;
 
-    openModal(openBtn);
+    if (!clickedBackdrop && !clickedModal) masterkey()
+    else if (!clickedBackdrop && !clickedSelf) masterkey(trackDepth = trackModal.indexOf(clickedModal) - 1)
+    else if (clickedBackdrop || closeBtn) closeModal()
 }
 // traps focus within most recent active modal
 function trapFocus(event) {
@@ -65,6 +73,13 @@ function createCSSManager() {
     const styles = document.createTextNode(`
         .modal-inactive { display: none !important; }
         .modal-scroll-locked { overflow: hidden !important; }
+        .modal-backdrop {
+            width: 100vw; 
+            height: 100vh; 
+            position: fixed;
+            top: 0; left: 0; 
+            background-color: rgba(0,0,0,0.8); 
+        }
         a.modal-close {
             padding: 10px;
             color: white;
@@ -78,7 +93,7 @@ function createCSSManager() {
 
     styleNode.setAttribute("id", "modal-css")
     styleNode.appendChild(styles)
-    head.appendChild(styleNode)
+    head.prepend(styleNode)
 }
 // Modal Manager houses all active modals and their respective backdrops
 function createModalManager() {
@@ -89,13 +104,7 @@ function createModalManager() {
 }
 function createBackdrop() {
     const div = document.createElement('div');
-    div.setAttribute(
-        'style',
-        `width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; background-color: rgba(0,0,0,0.8); z-index: ${trackDepth * 2 - 1
-        };`
-    );
     div.setAttribute('class', 'modal-backdrop');
-    div.addEventListener('click', closeModal);
     return div;
 }
 function createCloseBtn() {
@@ -160,10 +169,13 @@ function updateFocusable(modal) {
 }
 
 function openModal(openBtn) {
-    trackDepth += 1; //
+    trackDepth += 1;
     const button = openBtn,
         modal = openBtn.nextElementSibling,
-        backdrop = createBackdrop();
+        backdrop = // if modal does not have a backdrop, automatically create and add one
+            modal?.nextElementSibling?.classList.contains("modal-backdrop")
+                ? modal.nextElementSibling
+                : createBackdrop();
 
     // if modal does not have a close button, automatically create and add one
     if (!modal.querySelectorAll('.modal-close').length) modal.prepend(createCloseBtn());
@@ -175,22 +187,24 @@ function openModal(openBtn) {
     }
     else pausePreviousModal()
 
-    modal.remove();                             // remove modal from where its original location
+    modal.remove();                                 // remove modal from where its original location
 
-    trackResume.push(document.activeElement);   // track previous element in focus before a modal was activated
-    trackButton.push(button);                   // track the original container of each modal
-    trackModal.push(modal);                     // track each all active modals and most recent modal
-    trackBackdrop.push(backdrop);               // track backdrop created for all current active modals
+    trackResume.push(document.activeElement);       // track previous element in focus before a modal was activated
+    trackButton.push(button);                       // track the original container of each modal
+    trackModal.push(modal);                         // track each all active modals and most recent modal
+    trackBackdrop.push(backdrop);                   // track backdrop created for all current active modals
 
     modal.setAttribute(
         'style',
         `position: fixed; top: 50%; left: 50%; transform: translate3d(-50%, -50%, 0); z-index: ${trackDepth * 2
         };`
     );
-    modal.classList.remove("modal-inactive")    // expose modal to visual users
-    modal.setAttribute("aria-hidden", "false")  // expose modal to assist tech
-    modalManager.prepend(backdrop);             // add backdrop to Modal Manager
-    modalManager.prepend(modal);                // add modal to Modal Manager
+    backdrop.setAttribute('style', `z-index: ${trackDepth * 2 - 1};`);
+    backdrop.classList.remove("modal-inactive")     // expose backdrop to visual users
+    modal.classList.remove("modal-inactive")        // expose modal to visual users
+    modal.setAttribute("aria-hidden", "false")      // expose modal to assist tech
+    modalManager.prepend(backdrop);                 // add backdrop to Modal Manager
+    modalManager.prepend(modal);                    // add modal to Modal Manager
     ariaHideRest(true);
 
     modal.firstChild.focus()
@@ -202,20 +216,29 @@ function closeModal() {
         resume = trackResume.pop(),
         backdrop = trackBackdrop.pop();
 
-    backdrop.remove();
-    button.after(modal);                        // put modal back where it was found
-    modal.classList.add("modal-inactive")       // hide modal from visual users
-    modal.setAttribute("aria-hidden", "true")   // hide modal from assist tech
+    button.after(modal);                            // put modal back where it was found
+    modal.classList.add("modal-inactive")           // hide modal from visual users
+    modal.setAttribute("aria-hidden", "true")       // hide modal from assist tech
+    backdrop.classList.add("modal-inactive")        // hide backdrop from visual users
+    backdrop.setAttribute("aria-hidden", "true")    // hide backdrop from assist tech
+    modal.after(backdrop)                           // put backdrop next to where modal was found
 
     resume.focus();
 
-    if (trackDepth) resumePreviousModal()       // if there are still modals, update focusable
-    else {                                      // perform only when last modal is closed
+    if (trackDepth) resumePreviousModal()           // if there are still modals, update focusable
+    else {                                          // perform only when last modal is closed
         body.removeEventListener('keydown', trapFocus);
         backdrop.removeEventListener('click', closeModal);
         scrollLock(false);
         ariaHideRest(false);
     }
+}
+// closes all or x number of modals at once
+function masterkey(number = undefined) {
+    const limit = number !== undefined ? number : trackDepth
+    while (limit)
+        closeModal()
+
 }
 function pausePreviousModal() {
     trackModal[trackDepth - 2].setAttribute("aria-hidden", "true")

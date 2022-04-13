@@ -96,6 +96,7 @@
 						<input type="text" />
 						<input type="text" />
 					</div>
+					<div class="modal-backdrop myBackdrop"></div>
 				</div>
 			</div>
 		</div>
@@ -195,6 +196,11 @@
 
 	.tallBoy {
 		height: 100vh;
-		overflow: scroll;
+		overflow-y: scroll;
+	}
+	.myBackdrop {
+		background-color: rgb(217, 199, 255, .2);
+		width: 50%;
+		height: 50%;
 	}
 </style>
