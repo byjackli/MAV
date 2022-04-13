@@ -52,7 +52,7 @@
 		<h2>modal stuff</h2>
 		<div>
 			<button class="modal-open">open modal</button>
-			<div role="dialog">
+			<div role="dialog" class="tallBoy">
 				<button class="modal-close">close</button>
 				<p>the modal</p>
 				<input type="text" />
@@ -81,7 +81,7 @@
 						<input type="text" />
 					</div>
 					<button class="modal-open">modal no3</button>
-					<div role="dialog">
+					<div role="dialog" class="tallBoy">
 						<p>😊 auto-generated close button</p>
 						<input type="text" />
 						<input type="text" />
@@ -96,6 +96,7 @@
 						<input type="text" />
 						<input type="text" />
 					</div>
+					<div class="modal-backdrop myBackdrop"></div>
 				</div>
 			</div>
 		</div>
@@ -192,78 +193,14 @@
 	button * {
 		color: #fff;
 	}
-	pre {
-		padding: 2rem;
-	}
-	code {
-		font-family: monospace !important;
-		font-weight: 200;
-		font-size: 16px;
-		color: #ff72ad;
 
-		white-space: pre-wrap; /* Since CSS 2.1 */
-		white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
-		white-space: -pre-wrap; /* Opera 4-6 */
-		white-space: -o-pre-wrap; /* Opera 7 */
-		word-wrap: break-word; /* Internet Explorer 5.5+ */
+	.tallBoy {
+		height: 100vh;
+		overflow-y: scroll;
 	}
-
-	#checklists {
-		width: 100%;
-		min-height: 100vh;
-		padding: 1em;
-
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: center;
-	}
-	#checklists div.list-container {
-		width: 100vw;
-		padding: 2em;
-
-		display: flex;
-		flex-flow: row wrap;
-		justify-content: center;
-		gap: 2em;
-
-		overflow-y: auto;
-	}
-	#checklists div.list {
-		min-width: 20ch;
-		width: 20ch;
-		padding: 1rem;
-		padding-bottom: 1.5rem;
-
-		border: 0.15rem solid #ff72ad;
-		border-radius: 6px;
-	}
-	#checklists div.list p {
-		padding: 1em 0;
-		font-size: 18px;
-	}
-	#checklists div.list ul {
-		list-style-type: none;
-		padding: 0;
-	}
-	#checklists div.list ul li,
-	#checklists div.list ul li span:first-of-type {
-		display: flex;
-		gap: 0.5em;
-	}
-	#checklists div.list ul li span:first-of-type {
-		width: 2ch;
-		justify-content: center;
-	}
-	#checklists div.list ul li span:last-of-type {
-		padding-top: 0.15em;
-	}
-
-	section#product-component {
-		background-color: #d9d9d9;
-		display: flex;
-		flex-direction: column;
-		justify-content: flex-start;
-		align-items: center;
+	.myBackdrop {
+		background-color: rgb(217, 199, 255, .2);
+		width: 50%;
+		height: 50%;
 	}
 </style>
