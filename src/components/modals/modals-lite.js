@@ -22,13 +22,14 @@ function init() {
 // create CSS classes
 function initCSS() {
     const styles = document.createTextNode(`
-        .modal-inactive { display: none; }
+        .modal-inactive { display: none !important; }
         a.modal-close {
             padding: 10px;
             color: white;
-            opacity: 0;
+            font-size: 16px;
+            text-decoration: underline;
+            cursor: pointer;
         }
-        a.modal-close:focus { opacity: 1; } 
     `),
         styleNode = document.createElement("style"),
         head = document.getElementsByTagName("head")[0];
@@ -146,7 +147,7 @@ function openModal(openBtn) {
         backdrop = createBackdrop();
 
     // if modal does not have a close button, automatically create and add one
-    if (!modal.querySelectorAll('.modal-close').length) modal.prepend(createCloseBtn);
+    if (!modal.querySelectorAll('.modal-close').length) modal.prepend(createCloseBtn());
 
     updateFocusable(modal);
     if (trackDepth < 2) body.addEventListener('keydown', trapFocus);
