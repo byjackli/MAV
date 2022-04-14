@@ -40,12 +40,15 @@ function observeClicks(event) {
 }
 // handles click events not within modal
 function listenToCloseClicks(event) {
-    const closeBtn = event.target.closest('.modal-close'), clickedBackdrop = event.target.closest(".modal-backdrop"),
-        clickedModal = event.target.closest('*[role="dialog"]'),
-        clickedSelf = trackModal.indexOf(clickedModal) === trackModal.length - 1;
+    const closeBtn = event.target.closest('.modal-close'),
+        clickedBackdrop = event.target.closest(".modal-backdrop"),
+        clickedModal = event.target.closest('*[role="dialog"]');
+
+    function isSelf(track, clicked) { return track.indexOf(clicked) === track.length - 1 }
 
     if (!clickedBackdrop && !clickedModal) masterkey()
-    else if (!clickedBackdrop && !clickedSelf) masterkey(trackDepth = trackModal.indexOf(clickedModal) - 1)
+    else if (!clickedBackdrop && !isSelf(trackModal, clickedModal)) masterkey(trackDepth - trackModal.indexOf(clickedModal) - 1)
+    else if (clickedBackdrop && !isSelf(trackBackdrop, clickedBackdrop)) masterkey(trackDepth - trackBackdrop.indexOf(clickedBackdrop))
     else if (clickedBackdrop || closeBtn) closeModal()
 }
 // traps focus within most recent active modal
@@ -235,9 +238,12 @@ function closeModal() {
 }
 // closes all or x number of modals at once
 function masterkey(number = undefined) {
-    const limit = number !== undefined ? number : trackDepth
-    while (limit)
+    let limit = number !== undefined ? number : trackDepth
+
+    while (limit) {
         closeModal()
+        limit--
+    }
 
 }
 function pausePreviousModal() {

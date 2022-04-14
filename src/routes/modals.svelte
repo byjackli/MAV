@@ -79,7 +79,17 @@
 						<p>nested modal 2</p>
 						<input type="text" />
 						<input type="text" />
+						<button class="modal-open">nested in 2</button>
+						<div role="dialog">
+							<button class="modal-close">close</button>
+							<p>nested inside the nested..?</p>
+							<input type="text" />
+							<input type="text" />
+							<input type="text" />
+						</div>
+						<div class="modal-backdrop noBackdrop" />
 					</div>
+					<div class="modal-backdrop noBackdrop" />
 					<button class="modal-open">modal no3</button>
 					<div role="dialog" class="tallBoy">
 						<p>😊 auto-generated close button</p>
@@ -96,7 +106,7 @@
 						<input type="text" />
 						<input type="text" />
 					</div>
-					<div class="modal-backdrop myBackdrop"></div>
+					<div class="modal-backdrop myBackdrop" />
 				</div>
 			</div>
 		</div>
@@ -198,8 +208,13 @@
 		height: 100vh;
 		overflow-y: scroll;
 	}
+	.noBackdrop {
+		width: 0;
+		height: 0;
+		overflow: hidden;
+	}
 	.myBackdrop {
-		background-color: rgb(217, 199, 255, .2);
+		background-color: rgb(217, 199, 255, 0.2);
 		width: 50%;
 		height: 50%;
 	}
