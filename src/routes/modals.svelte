@@ -49,6 +49,18 @@
 		</a>
 	</aside>
 	<section>
+		<br />
+		<p>
+			UPDATE: This project has now matured into its own dedicated <a
+				href="https://github.com/byjackli/happymodals"
+				rel="noreferrer">project</a
+			>.
+		</p>
+		<br />
+		<p>
+			There's a non-traditional take on the documentation on the Happy Modals <a href="https://happymodals.com" rel="noreferrer">website</a>. Let me know what you think on twitter!
+		</p>
+		<br />
 		<h2>modal stuff</h2>
 		<div>
 			<button class="modal-open">open modal</button>

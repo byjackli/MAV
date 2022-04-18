@@ -83,12 +83,10 @@ function createCSSManager() {
             top: 0; left: 0; 
             background-color: rgba(0,0,0,0.8); 
         }
-        a.modal-close {
+        .modal-close {
             padding: 10px;
-            color: white;
-            font-size: 16px;
-            text-decoration: underline;
-            cursor: pointer;
+            background-color: white;
+            color: black;
         }
     `),
         styleNode = document.createElement("style"),
@@ -112,11 +110,10 @@ function createBackdrop() {
 }
 function createCloseBtn() {
     const content = document.createTextNode('close modal'),
-        ariaClose = document.createElement('a');
+        ariaClose = document.createElement('button');
 
     ariaClose.appendChild(content);
     ariaClose.setAttribute('class', 'modal-close');
-    ariaClose.setAttribute('tabindex', '0');
     ariaClose.setAttribute('style', 'position: absolute; top: -75px; right: 0;');
     return ariaClose
 }
@@ -254,6 +251,6 @@ function resumePreviousModal() {
     updateFocusable(trackModal[trackDepth - 1]);
 }
 
-window.onload = init;
+// window.onload = init;
 
 export default init
