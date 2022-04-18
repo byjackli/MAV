@@ -40,12 +40,15 @@ function observeClicks(event) {
 }
 // handles click events not within modal
 function listenToCloseClicks(event) {
-    const closeBtn = event.target.closest('.modal-close'), clickedBackdrop = event.target.closest(".modal-backdrop"),
-        clickedModal = event.target.closest('*[role="dialog"]'),
-        clickedSelf = trackModal.indexOf(clickedModal) === trackModal.length - 1;
+    const closeBtn = event.target.closest('.modal-close'),
+        clickedBackdrop = event.target.closest(".modal-backdrop"),
+        clickedModal = event.target.closest('*[role="dialog"]');
+
+    function isSelf(track, clicked) { return track.indexOf(clicked) === track.length - 1 }
 
     if (!clickedBackdrop && !clickedModal) masterkey()
-    else if (!clickedBackdrop && !clickedSelf) masterkey(trackDepth = trackModal.indexOf(clickedModal) - 1)
+    else if (!clickedBackdrop && !isSelf(trackModal, clickedModal)) masterkey(trackDepth - trackModal.indexOf(clickedModal) - 1)
+    else if (clickedBackdrop && !isSelf(trackBackdrop, clickedBackdrop)) masterkey(trackDepth - trackBackdrop.indexOf(clickedBackdrop))
     else if (clickedBackdrop || closeBtn) closeModal()
 }
 // traps focus within most recent active modal
@@ -80,12 +83,10 @@ function createCSSManager() {
             top: 0; left: 0; 
             background-color: rgba(0,0,0,0.8); 
         }
-        a.modal-close {
+        .modal-close {
             padding: 10px;
-            color: white;
-            font-size: 16px;
-            text-decoration: underline;
-            cursor: pointer;
+            background-color: white;
+            color: black;
         }
     `),
         styleNode = document.createElement("style"),
@@ -109,11 +110,10 @@ function createBackdrop() {
 }
 function createCloseBtn() {
     const content = document.createTextNode('close modal'),
-        ariaClose = document.createElement('a');
+        ariaClose = document.createElement('button');
 
     ariaClose.appendChild(content);
     ariaClose.setAttribute('class', 'modal-close');
-    ariaClose.setAttribute('tabindex', '0');
     ariaClose.setAttribute('style', 'position: absolute; top: -75px; right: 0;');
     return ariaClose
 }
@@ -235,9 +235,12 @@ function closeModal() {
 }
 // closes all or x number of modals at once
 function masterkey(number = undefined) {
-    const limit = number !== undefined ? number : trackDepth
-    while (limit)
+    let limit = number !== undefined ? number : trackDepth
+
+    while (limit) {
         closeModal()
+        limit--
+    }
 
 }
 function pausePreviousModal() {
@@ -248,6 +251,6 @@ function resumePreviousModal() {
     updateFocusable(trackModal[trackDepth - 1]);
 }
 
-window.onload = init;
+// window.onload = init;
 
 export default init
