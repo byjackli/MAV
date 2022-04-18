@@ -89,6 +89,18 @@ See Projects section for project-specific tools that were used.
 * all color combinations must be WCAG2.1 AAA compliant
 
 
+### Products
+* need an online payment processing service for some projects
+* building basic components and testing with Stripe
+
+
+### Modals
+* need a lightweight and reusable method of creating web accessible modals/dialogs
+* need to be stress-free yet highly configurable
+* must work on vanillaJS and Svelte (other platforms are not important to me at this moment)
+* cool visualization that shows people how it works
+
+
 ### Bulk Image Compression
 * simple fast way to easily compress lots of images at a time, one-click approach
 * inspired by squoosh
@@ -103,8 +115,10 @@ Currently working on projects that are marked.
 
 - [ ] Modular Arithmetic Visualizer
 - [x] Svelte Forms
-- [x] Color Builder
-- [x] Bulk Image Compression
+- [ ] Color Builder
+- [x] Products
+- [x] Modals
+- [ ] Bulk Image Compression
 
 @ me on [twitter](https://www.twitter.com/byjackli) if something stands out.
 <p align="right">(<a href="#top">back to top</a>)</p>
