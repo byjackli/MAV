@@ -37,7 +37,10 @@
     <ul>
         <li><a href="#modular-arithmetic-visualizer">Modular Arithmetic Visualizer</a></li>
         <li><a href="#svelte-forms">Svelte Forms</a></li>
-        <li><a href="#color-contrast">Color Builder</a></li>
+        <li><a href="#color-builder">Color Builder</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#modals">Modals</a></li>
+        <li><a href="#bulk-image-compression">Bulk Image Compression</a></li>
       </ul>
     </li>
     <li><a href="#roadmap">Roadmap</a></li>
@@ -131,6 +134,8 @@ Currently working on projects that are marked.
 Jack Li - [@byjackli](https://twitter.com/byjackli) - email@byjackli.com
 
 Project Link: [https://github.com/byjackli/experiments](https://github.com/byjackli/experiments)
+
+Website Link: [https://experiments.byjackli.com](https://experiments.byjackli.com)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
