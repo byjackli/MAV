@@ -21,26 +21,40 @@
 			for (const char of string) odd += `${char}${splitter}`;
 			return odd;
 		}
+		function undoMakeOdd(string: string): string {
+			let undone = '';
+			for (const char of string) if (char !== splitter) undone += char;
+			return undone;
+		}
 
-        // returns the farthest points where given an origin, the lhs mirrors the rhs
-		function expand(origin: number, string: string): { p1: number; p2: number; } {
+		// returns the radius of the expansion
+		function expand(origin: number, string: string): number {
 			let p1 = origin,
 				p2 = origin;
-			while (string[p1 - 1] !== undefined && string[p2 + 1] !== undefined) {
-				if (string[p1] !== string[p2]) break;
-
+			while (
+				string[p1 - 1] !== undefined &&
+				string[p2 + 1] !== undefined &&
+				string[p1] === string[p2]
+			) {
 				p1--;
 				p2++;
 			}
 
-			return { p1, p2 };
+			return (p2 - p1 + 1) / 2;
 		}
-        
-        for (let i=0; i<string.length; i++) {
-            expand(i, string)
-        }
 
-		return string;
+		const trackRadius = {};
+		let indexOfLongestRadius = 0;
+		for (let index = 0; index < string.length; index++) {
+			// predict radius
+			// only expand if predicted radius is within boundaries
+			if (true) {
+				if (trackRadius[indexOfLongestRadius] < (trackRadius[index] = expand(index, string)))
+					indexOfLongestRadius = index;
+			}
+		}
+
+		return undoMakeOdd(string);
 	}
 </script>
 
